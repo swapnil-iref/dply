@@ -1,0 +1,42 @@
+require 'dply/shell'
+module Dply
+  module Git
+
+    extend Shell
+
+    def self.pull(branch)
+      cmd "git fetch"
+      cmd "git checkout #{branch}"
+      if tracking_branch = get_tracking_branch(branch)
+        cmd "git merge  #{tracking_branch}"
+      else
+        cmd "git pull origin #{branch}"
+      end
+    end
+  
+    def self.checkout(branch)
+      cmd "git checkout #{branch}" 
+    end
+
+    def self.clone(repo, dir, mirror: nil)
+      cmd "git clone #{repo} #{dir}"
+    end
+
+    def self.get_tracking_branch(branch)
+      command = "git for-each-ref --format='%(upstream:short)' refs/heads/#{branch} --count=1"
+      tracking_branch = `#{command}`
+      if tracking_branch =~ /[a-zA-Z0-9_]/
+        return tracking_branch.chomp!
+      else
+        return nil
+      end  
+    end
+
+    def self.get_remote_url
+     remote_url = cmd "git config --get remote.origin.url", return_output: true, display: false
+     logger.debug remote_url.chomp
+     remote_url.chomp
+    end
+
+  end
+end
