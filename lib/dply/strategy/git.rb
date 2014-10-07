@@ -12,7 +12,7 @@ module Dply
       include Helper
 
       def_delegators :config, :target, :branch, :link_config,
-                              :config_dir, :config_map
+                              :config_dir, :config_map, :dir_map
       
       attr_reader :config, :options
 
@@ -23,8 +23,9 @@ module Dply
 
       def deploy
         setup.run
-        Dir.chdir deploy_dir do
+        Dir.chdir current_dir do
           git_step
+          link_dirs
           link_config_files
           tasks.deploy target
         end
@@ -35,8 +36,8 @@ module Dply
 
       private
 
-      def deploy_dir
-        @deploy_dir ||= "#{config.deploy_dir}/current"
+      def current_dir
+        @current_dir ||= "#{config.deploy_dir}/current"
       end
 
       def git_step
@@ -49,15 +50,30 @@ module Dply
       end
 
       def link_config_files
-        config_linker.create_symlinks if link_config
+        return if not link_config
+        logger.bullet "symlinking config files"
+        config_linker.create_symlinks
+      end
+
+      def link_dirs
+        return if not dir_map
+        logger.bullet "symlinking shared dirs"
+        dir_linker.create_symlinks
       end
 
       def config_linker
         return @config_linker if @config_linker
         dir_prefix = config_dir || "config"
         source = "#{config.deploy_dir}/config"
-        dest = deploy_dir
+        dest = current_dir
         @config_linker ||= ::Dply::Linker.new(source, dest, map: config_map, dir_prefix: dir_prefix)
+      end
+
+      def dir_linker
+        return @dir_linker if @dir_linker
+        source = "#{config.deploy_dir}/shared"
+        dest = current_dir
+        @dir_linker ||= ::Dply::Linker.new(source, dest, map: dir_map)
       end
 
       def setup

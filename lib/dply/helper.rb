@@ -1,6 +1,8 @@
 require 'dply/tasks'
 require 'dply/shell'
 require 'dply/git'
+require 'dply/error'
+require 'dply/logger'
 
 
 module Dply
@@ -23,6 +25,10 @@ module Dply
 
     def tasks
       ::Dply::Helper.tasks
+    end
+
+    def error(msg)
+      ::Dply::Error.new(msg)
     end
 
   end

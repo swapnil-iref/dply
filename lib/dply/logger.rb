@@ -19,5 +19,9 @@ module Dply
       ::Dply::Logger.stderr
     end
 
+    def debug?
+      logger.level == ::Logger::DEBUG
+    end
+
   end
 end

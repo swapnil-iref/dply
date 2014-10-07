@@ -1,15 +1,15 @@
 require 'ostruct'
-require 'dply/error'
-require 'dply/logger'
+require 'dply/helper'
 
 module Dply
   class Config
 
-    include ::Dply::Logger
-    attr_reader :deploy_dir
+    include Helper
+    attr_reader :deploy_dir, :config_file_required
 
-    def initialize(deploy_dir)
+    def initialize(deploy_dir, config_file_required: true)
       @deploy_dir = deploy_dir
+      @config_file_required = config_file_required
     end
 
     def config
@@ -23,6 +23,7 @@ module Dply
         env: {},
         link_config: false,
         config_map: nil,
+        dir_map: nil,
         shared_dirs: []
       }
       read_from_file
@@ -54,7 +55,11 @@ module Dply
       set :config_map, map
     end
 
-    def env(key, value)
+    def dir_map(map)
+      set :dir_map, map
+    end
+
+    def set_env(key, value)
       @config[:env].store key, value
     end
 
@@ -66,25 +71,31 @@ module Dply
       OpenStruct.new(config)
     end
 
-    def env=(h)
+    def env(h)
       raise if not h.is_a? Hash
       @config[:env] = h
+      @config[:env].each do |k,v|
+        ENV[k.to_s] = v.to_s
+      end
     end
 
     def config_file
       @config_file ||= "#{deploy_dir}/dply.rb"
     end
 
-    def shared_dirs=(dirs)
+    def shared_dirs(dirs)
       raise if not dirs.is_a? Array
       @config[:shared_dirs] = dirs
     end
 
     def read_from_file
-      return if not File.readable? config_file
+      if not File.readable? config_file
+        raise error "dply.rb not found in #{deploy_dir}"  if config_file_required
+        return
+      end
       instance_eval(File.read(config_file))
     rescue NoMethodError => e
-      logger.warn "invalid option used in config: #{e.name}"
+      raise error "invalid option used in config: #{e.name}"
     end
 
   end

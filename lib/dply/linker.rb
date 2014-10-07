@@ -1,10 +1,8 @@
-require 'dply/shell'
-require 'dply/logger'
+require 'dply/helper'
 module Dply
   class Linker
 
-    include Shell
-    include Logger
+    include Helper
 
     attr_reader :src_dir, :dest_dir, :map, :dir_prefix
 
@@ -17,7 +15,6 @@ module Dply
     end
     
     def create_symlinks
-      puts "symlinking files"
       files.each do |f|
         link_target = link_target(f)
         absolute_source_path = absolute_source_path(f)
@@ -28,11 +25,11 @@ module Dply
     end
 
     def files
-      map ? mapped_files : all_files
+      @map ? mapped_files : all_files
     end
 
     def map
-      @map ||= default_map
+      @map || default_map
     end
 
     def link_target(relative_source)

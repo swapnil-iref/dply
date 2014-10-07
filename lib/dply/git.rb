@@ -6,16 +6,17 @@ module Dply
 
     def self.pull(branch)
       cmd "git fetch"
-      cmd "git checkout #{branch}"
+      checkout(branch)
       if tracking_branch = get_tracking_branch(branch)
-        cmd "git merge  #{tracking_branch}"
+        cmd "git merge #{tracking_branch}"
       else
         cmd "git pull origin #{branch}"
       end
     end
   
     def self.checkout(branch)
-      cmd "git checkout #{branch}" 
+      current_branch = `git rev-parse --abbrev-ref HEAD `.chomp.to_sym
+      cmd "git checkout #{branch}" if branch != current_branch
     end
 
     def self.clone(repo, dir, mirror: nil)

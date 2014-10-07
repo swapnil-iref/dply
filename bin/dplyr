@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby 
+lib = File.expand_path(File.dirname(__FILE__) + '/../lib')
+$LOAD_PATH.unshift(lib) if File.directory?(lib) && !$LOAD_PATH.include?(lib)
+
+Signal.trap("INT") { exit 1 }
+
+require 'optparse'
+require 'dply/error'
+require 'dply/version'
+require 'dply/logger'
+require 'dply/dplyr'
+require 'pathname'
+
+logger = ::Dply::Logger.logger
+options = {}
+
+opts_parser = OptionParser.new do |opts| 
+    
+    banner = [] 
+    banner << "Usage: dplyr [global options] stage command [options] args"
+    banner << "Commands:"
+    banner << "    deploy"
+    banner << "    switch"
+    banner << "    rollback"
+    
+    banner << "Options: "
+    opts.banner = banner.join("\n")
+
+    opts.on("-d", "--deploy-dir [DEPLOY DIR]" , "Set deploy dir") do |d| 
+      path = Pathname.new(d)
+      raise ::Dply::Error, "deploy_dir path must be absolute" if path.relative?
+      options[:deploy_dir] = path
+    end 
+
+    opts.on("-v", "--version", "Show version") do |v|
+      puts ::Dply::VERSION
+      exit
+    end
+
+    opts.on("--debug", "Show debug messages") do
+      options[:debug] = true
+      logger.level = ::Logger::DEBUG
+    end
+
+    opts.on("--trace", "Show debug messages and exception stack trace") do
+      options[:debug] = true
+      options[:trace] = true
+      logger.level = ::Logger::DEBUG
+    end
+
+    opts.on_tail("-h", "--help", "Show this message") do 
+      puts opts
+      exit
+    end 
+end
+begin
+  opts_parser.order!(ARGV)
+  deploy_dir = options[:deploy_dir] || Dir.pwd
+  Dir.chdir deploy_dir
+
+  stage = ARGV.shift
+
+  dplyr = ::Dply::Dplyr.new(stage, ARGV)
+  dplyr.run
+
+rescue OptionParser::InvalidOption, OptionParser::MissingArgument, ::Dply::Error => e
+  cause = e.cause
+  if options[:trace]
+    puts cause
+    cause ? (raise cause) : (raise e)
+  else
+    logger.debug "#{cause.message}" if cause
+    logger.error "#{e.message}"
+    abort
+  end
+end

@@ -1,3 +1,5 @@
+require 'dply/error'
+
 module Dply
   module Shell
 
@@ -5,7 +7,7 @@ module Dply
 
     def cmd(command, display: true, error_msg: nil, return_output: false)
       if display
-        puts "#{"Running".bold.blue} #{command}"
+        puts "#{"\u2219".bold.blue} #{command}"
       else
         logger.debug command
       end
@@ -16,8 +18,8 @@ module Dply
         system "#{command} 2>&1"
       end 
       return_value = $?.exitstatus
-      error_msg ||= "Non zero exit for \"#{command}\""
-      raise  error_msg if return_value !=0 
+      error_msg ||= "non zero exit for \"#{command}\""
+      raise ::Dply::Error, error_msg if return_value !=0 
       return output
     end 
 

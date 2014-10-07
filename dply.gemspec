@@ -7,9 +7,8 @@ Gem::Specification.new do |spec|
   spec.name          = "dply"
   spec.version       = Dply::VERSION
   spec.authors       = ["Neeraj"]
-  spec.email         = ["neeraj.bhunwal@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{rake based deploy tool}
+  spec.description   = %q{rake based deploy tool}
   spec.homepage      = ""
   spec.license       = "MIT"
 

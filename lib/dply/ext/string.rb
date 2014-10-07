@@ -26,4 +26,8 @@ class String
   def blue
     colorize(34)
   end 
+
+  def grey
+    colorize("90")
+  end
 end

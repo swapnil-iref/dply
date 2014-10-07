@@ -3,7 +3,7 @@ require 'fileutils'
 module Dply
   class SharedDirs
 
-    def initalize(extra_dirs)
+    def initialize(extra_dirs)
       dirs << extra_dirs
     end
 

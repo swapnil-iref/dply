@@ -21,5 +21,9 @@ module Dply
       end
     end
 
+    def bullet(msg)
+      puts "#{"\u2219".bold.blue} #{msg}"
+    end
+
   end
 end

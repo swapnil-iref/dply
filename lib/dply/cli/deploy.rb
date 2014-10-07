@@ -1,7 +1,12 @@
 require 'dply/deploy'
+require 'dply/logger'
+require 'dply/lock'
+
 module Dply
   module Cli
     class Deploy
+
+      include Logger
 
       attr_reader :deploy_dir, :argv
 
@@ -11,6 +16,7 @@ module Dply
       end
 
       def run
+        lock.acquire
         opts.parse!(argv)
         target = argv.shift
         deploy.config.target = target if target
@@ -20,6 +26,10 @@ module Dply
 
       def deploy
         @deploy ||= ::Dply::Deploy.new(deploy_dir)
+      end
+
+      def lock
+        @lock ||= ::Dply::Lock.new(deploy_dir)
       end
 
       def opts

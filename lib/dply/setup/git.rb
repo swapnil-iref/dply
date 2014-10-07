@@ -20,7 +20,7 @@ module Dply
           repo.create
           symlink "repo", "current"
           create_dirs
-          shared_dirs.create_in "current"
+          shared_dirs.create_in "shared"
         end
       end
 
@@ -31,12 +31,12 @@ module Dply
       end
 
       def create_dirs
-        dirs = ["config"]
+        dirs = ["config", "shared"]
         FileUtils.mkdir_p dirs
       end
 
       def shared_dirs
-        @shared_dirs ||= SharedDirs.new
+        @shared_dirs ||= SharedDirs.new(config.shared_dirs)
       end
 
       def setup_dir
