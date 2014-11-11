@@ -24,7 +24,9 @@ module Dply
         link_config: false,
         config_map: nil,
         dir_map: nil,
-        shared_dirs: []
+        shared_dirs: [],
+        config_skip_download: [],
+        config_download_url: nil
       }
       read_from_file
       return @config
@@ -54,6 +56,16 @@ module Dply
       set :link_config, true
       set :config_map, map
     end
+
+    def config_skip_download(list)
+      set :config_skip_download, list
+    end
+
+    def config_download_url(url)
+      set :config_download_url, url
+    end
+
+
 
     def dir_map(map)
       set :dir_map, map

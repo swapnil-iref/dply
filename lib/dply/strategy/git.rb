@@ -1,6 +1,7 @@
 require 'dply/helper'
 require 'dply/setup'
 require 'dply/linker'
+require 'dply/config_downloader'
 require 'forwardable'
 
 
@@ -12,7 +13,9 @@ module Dply
       include Helper
 
       def_delegators :config, :target, :branch, :link_config,
-                              :config_dir, :config_map, :dir_map
+                     :config_dir, :config_map, :dir_map, :config_skip_download,
+                     :config_download_url
+                
       
       attr_reader :config, :options
 
@@ -23,6 +26,7 @@ module Dply
 
       def deploy
         setup.run
+        config_downloader.download_all if config_download_url
         Dir.chdir current_dir do
           git_step
           link_dirs
@@ -67,6 +71,10 @@ module Dply
         source = "#{config.deploy_dir}/config"
         dest = current_dir
         @config_linker ||= ::Dply::Linker.new(source, dest, map: config_map, dir_prefix: dir_prefix)
+      end
+
+      def config_downloader
+        @config_downloader = ::Dply::ConfigDownloader.new(config_map.keys, config_download_url, config_skip_download: config_skip_download)
       end
 
       def dir_linker
