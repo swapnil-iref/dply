@@ -64,6 +64,10 @@ begin
     require 'dply/cli/deploy'
     cli = Dply::Cli::Deploy.new(deploy_dir, ARGV)
     cli.run
+  when :reload
+    require 'dply/cli/reload'
+    cli = Dply::Cli::Reload.new(deploy_dir, ARGV)
+    cli.run
   when :''
     puts opts_parser
   else
