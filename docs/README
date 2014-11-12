@@ -1,0 +1,38 @@
+directory structure when app is deployed using dplyr:
+
+/srv/app_user/app/
+├── config
+│   └── database.yml
+├── current -> repo
+├── dply.rb
+├── shared
+│   ├── log
+│   ├── public
+│   │   └── assets
+│   └── tmp
+│       ├── pids
+│       └── sockets
+├── repo
+│   ├── app
+│   ├── config
+│   │   └── database.yml -> ../../config/database.yml
+│   ├── config.ru
+│   ├── db
+|   ├── dply
+│   ├── Gemfile
+│   ├── Gemfile.lock
+│   ├── lib
+│   ├── log -> ../shared/log
+│   ├── public
+│   │   ├── assets -> ../../shared/public/assets
+│   ├── Rakefile
+│   ├── README.md
+│   ├── README.rdoc
+│   ├── tmp -> ../shared/tmp
+├── shared
+│   ├── log
+│   ├── public
+│   │   └── assets
+│   └── tmp
+│       ├── pids
+│       └── sockets
