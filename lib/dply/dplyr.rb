@@ -1,7 +1,11 @@
 require 'dply/stages_config'
 require 'dply/remote_task'
+require 'dply/logger'
+
 module Dply
   class Dplyr
+
+    include Logger
 
     attr_reader :stage, :argv
     def initialize(stage, argv)
@@ -14,7 +18,11 @@ module Dply
       when 'dev'
         system "drake #{argv_str}"
       when 'local'
-        system "drake #{argv_str}"
+        if logger.debug?
+          system "drake --debug #{argv_str}"
+        else
+          system "drake #{argv_str}"
+        end
       else
         run_remote_task
       end
@@ -32,12 +40,20 @@ module Dply
       stage_data[:parallel_runs]
     end
 
+    def env_str
+      str = ""
+      stage_data[:env].each do |k,v|
+        str << %(DPLY_#{k.upcase}="#{v}" )
+      end
+      str
+    end
+
     def argv_str
       @argv_str ||= argv.join(' ')
     end
 
     def run_remote_task
-      remote_task = ::Dply::RemoteTask.new(hosts, argv_str, parallel_jobs: parallel_jobs)
+      remote_task = ::Dply::RemoteTask.new(hosts, argv_str, parallel_jobs: parallel_jobs, env: env_str)
       remote_task.run
     end
 

@@ -35,7 +35,7 @@ module Dply
         host: host,
         user: user || get_from_current_stage(:user),
         deploy_dir: deploy_dir || get_from_current_stage(:deploy_dir),
-        id: id || "unnamed"
+        id: id || host
       }
       hosts << host_info
     end
@@ -72,10 +72,19 @@ module Dply
       end
     end
 
+    def ask(key)
+      print "Enter #{key}: "
+      value = STDIN.gets.chomp
+      env = get_from_current_stage(:env)
+      env[key] = value
+    end
+
     def init_stage(name)
-      stages[name] = {}
-      stages[name][:hosts] = []
-      stages[name][:parallel_runs] = 1
+      stages[name] = {
+        hosts: [],
+        parallel_runs: 1,
+        env: {}
+      }
     end
 
 

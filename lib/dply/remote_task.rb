@@ -7,12 +7,13 @@ module Dply
 
     include Logger
     
-    attr_reader :hosts, :parallel_jobs, :task
+    attr_reader :hosts, :parallel_jobs, :task, :env
 
-    def initialize(hosts, task, parallel_jobs: 1)
+    def initialize(hosts, task, parallel_jobs: 1, env: "")
       @hosts = hosts
       @parallel_jobs = parallel_jobs
       @task = task
+      @env = env
     end
 
     def run
@@ -78,9 +79,9 @@ module Dply
       host = host_info[:host]
       deploy_dir = host_info[:deploy_dir]
       if logger.debug?
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "drake --debug -d #{deploy_dir} #{task} 2>&1")
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --debug -d #{deploy_dir} #{task} 2>&1")
       else
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "drake -d #{deploy_dir} #{task} 2>&1" 2>/dev/null)
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake -d #{deploy_dir} #{task} 2>&1" 2>/dev/null)
       end
     end
 
