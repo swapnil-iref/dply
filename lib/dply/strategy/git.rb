@@ -67,14 +67,13 @@ module Dply
 
       def config_linker
         return @config_linker if @config_linker
-        dir_prefix = config_dir || "config"
         source = "#{config.deploy_dir}/config"
         dest = current_dir
-        @config_linker ||= ::Dply::Linker.new(source, dest, map: config_map, dir_prefix: dir_prefix)
+        @config_linker ||= ::Dply::Linker.new(source, dest, map: config_map)
       end
 
       def config_downloader
-        @config_downloader = ::Dply::ConfigDownloader.new(config_map.keys, config_download_url, config_skip_download: config_skip_download)
+        @config_downloader = ::Dply::ConfigDownloader.new(config_map.values.uniq, config_download_url, config_skip_download: config_skip_download)
       end
 
       def dir_linker

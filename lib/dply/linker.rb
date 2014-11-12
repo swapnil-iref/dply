@@ -4,52 +4,36 @@ module Dply
 
     include Helper
 
-    attr_reader :src_dir, :dest_dir, :map, :dir_prefix
+    attr_reader :src_dir, :dest_dir, :map
 
-    def initialize(src_dir, dest_dir, map: nil, dir_prefix: nil)
+    def initialize(src_dir, dest_dir, map: {})
       verify_absolute src_dir, dest_dir
       @src_dir = src_dir
       @dest_dir = dest_dir
       @map = map
-      @dir_prefix = dir_prefix
     end
     
     def create_symlinks
-      files.each do |f|
-        link_target = link_target(f)
-        absolute_source_path = absolute_source_path(f)
-        relative_path = absolute_source_path.relative_path_from link_target.parent
-        logger.debug "linking #{link_target} -> #{absolute_source_path}"
-        symlink(relative_path, link_target)
+      mapped_files.each do |f|
+        target = link_target(f)
+        source = link_source(f)
+        relative_source = link_relative_source(source, target)
+        logger.debug "linking #{target} -> #{source}"
+        symlink(relative_source, target)
       end
     end
 
-    def files
-      @map ? mapped_files : all_files
+    def link_target(relative_target)
+      Pathname.new "#{dest_dir}/#{relative_target}"
     end
 
-    def map
-      @map || default_map
+    def link_source(relative_target)
+      relative_source = map[relative_target]
+      Pathname.new "#{src_dir}/#{relative_source}"
     end
 
-    def link_target(relative_source)
-      target = map[relative_source]
-      Pathname.new "#{dest_dir}/#{target}"
-    end
-
-    def absolute_source_path(src)
-      Pathname.new "#{src_dir}/#{src}"
-    end
-
-
-    def default_map
-      @h ||= Hash.new do |hash, key|
-        dir_prefix ? "#{dir_prefix}/#{key}" : "#{key}"
-      end
-    end
-
-    def all_files
-      Dir.chdir(src_dir) { Dir.glob("*") }
+    def link_relative_source(source, target)
+      source.relative_path_from target.parent
     end
     
     def mapped_files
