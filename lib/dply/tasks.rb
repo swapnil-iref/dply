@@ -4,9 +4,10 @@ module Dply
 
     include Shell
 
-    def deploy(target)
+    def deploy(target, env:{})
+      env.merge!(env_from_yml)
       bundle_install
-      cmd "#{rake_command} #{target}:deploy"
+      cmd "#{rake_command} #{target}:deploy", env: env
     end
 
     def switch(target)
@@ -32,6 +33,17 @@ module Dply
       return if exitstatus
       cmd "bundle install"
     end
+
+    def env_from_yml
+      path = "config/env.yml"
+      if not File.readable? path
+        logger.debug "skipped loading env from #{path}"
+        return {}
+      end
+      require 'yaml'
+      YAML.load_file(path)
+    end
+
 
   end
 end

@@ -28,10 +28,16 @@ module Dply
         setup.run
         config_downloader.download_all if config_download_url
         Dir.chdir current_dir do
+          previous_version = git.commit_id
           git_step
+          current_version = git.commit_id
           link_dirs
           link_config_files
-          tasks.deploy target
+          env = {
+            "DPLY_PREVIOUS_VERSION" => previous_version,
+            "DPLY_CURRENT_VERSION" => current_version
+          }
+          tasks.deploy target, env: env
         end
       end
 

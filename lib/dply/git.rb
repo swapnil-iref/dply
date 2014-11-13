@@ -39,5 +39,11 @@ module Dply
      remote_url.chomp
     end
 
+    def self.commit_id
+      commit_id = cmd "git rev-parse HEAD", return_output: true, display: false
+      logger.debug commit_id.chomp
+      commit_id.chomp
+    end
+
   end
 end

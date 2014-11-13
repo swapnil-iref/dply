@@ -5,17 +5,18 @@ module Dply
 
     include Logger
 
-    def cmd(command, display: true, error_msg: nil, return_output: false)
+    def cmd(command, display: true, error_msg: nil, return_output: false, env:{})
+      stringify_values(env)
       if display
         puts "#{"\u2219".bold.blue} #{command}"
       else
         logger.debug command
       end
       if return_output
-        output = `#{command}`
+        output = `#{env_str(env)} #{command}`
       else
         output = ""
-        system "#{command} 2>&1"
+        system env, "#{command} 2>&1"
       end 
       return_value = $?.exitstatus
       error_msg ||= "non zero exit for \"#{command}\""
@@ -41,6 +42,20 @@ module Dply
       src_path = Pathname.new(src)
       dst = "#{destdir}/#{src_path.basename}"
       symlink src, dst
+    end
+
+    def env_str(env)
+      str = ""
+      env.each do |k,v|
+        str << %(#{k}="#{v.to_s}")
+      end
+      str
+    end
+
+    def stringify_values(hash)
+      hash.each do |k,v|
+        hash[k] = v.to_s
+      end
     end
 
   end
