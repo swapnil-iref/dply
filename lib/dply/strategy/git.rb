@@ -44,6 +44,13 @@ module Dply
       def switch
       end
 
+      def reload
+        config_downloader.download_all if config_download_url
+        Dir.chdir current_dir do
+          tasks.reload target
+        end
+      end
+
       private
 
       def current_dir

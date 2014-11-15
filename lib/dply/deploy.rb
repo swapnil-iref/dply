@@ -1,4 +1,3 @@
-require 'dply/setup'
 require 'dply/strategy'
 require 'dply/config'
 

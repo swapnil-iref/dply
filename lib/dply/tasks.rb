@@ -11,8 +11,15 @@ module Dply
     end
 
     def switch(target)
+      env.merge!(env_from_yml)
       bundle_install
-      cmd "#{rake_command} #{target}:switch"
+      cmd "#{rake_command} #{target}:switch", env: env
+    end
+
+    def reload(target)
+      env.merge!(env_from_yml)
+      bundle_install
+      cmd "#{rake_command} #{target}:reload", env: env
     end
 
     def gemfile_exists?
