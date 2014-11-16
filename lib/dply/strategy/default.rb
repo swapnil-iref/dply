@@ -26,6 +26,13 @@ module Dply
 
       end
 
+      def reload
+        Dir.chdir deploy_dir do
+          git_step
+          tasks.reload config.target
+        end
+      end
+
       private
 
       def deploy_dir

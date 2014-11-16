@@ -5,11 +5,11 @@ module Dply
   class Config
 
     include Helper
-    attr_reader :deploy_dir, :config_file_required
+    attr_reader :deploy_dir, :read_config
 
-    def initialize(deploy_dir, config_file_required: true)
+    def initialize(deploy_dir, read_config: true)
       @deploy_dir = deploy_dir
-      @config_file_required = config_file_required
+      @read_config = read_config
     end
 
     def config
@@ -28,7 +28,7 @@ module Dply
         config_skip_download: [],
         config_download_url: nil
       }
-      read_from_file
+      read_from_file if read_config
       return @config
     end
 
@@ -102,7 +102,7 @@ module Dply
 
     def read_from_file
       if not File.readable? config_file
-        raise error "dply.rb not found in #{deploy_dir}"  if config_file_required
+        raise error "dply.rb not found in #{deploy_dir}"
         return
       end
       instance_eval(File.read(config_file))

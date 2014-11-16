@@ -8,24 +8,25 @@ module Dply
 
       include Logger
 
-      attr_reader :deploy_dir, :argv
+      attr_reader :deploy_dir, :argv, :config
 
-      def initialize(deploy_dir, argv)
+      def initialize(deploy_dir, config, argv)
         @deploy_dir = deploy_dir
         @argv = argv
+        @config = config
       end
 
       def run
         lock.acquire
         opts.parse!(argv)
         target = argv.shift
-        reload.config.target = target if target
+        config.target = target if target
         reload.options = options
         reload.run
       end
 
       def reload
-        @reload ||= ::Dply::Reload.new(deploy_dir)
+        @reload ||= ::Dply::Reload.new(deploy_dir, config)
       end
 
       def lock

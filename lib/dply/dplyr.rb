@@ -14,15 +14,14 @@ module Dply
     end
 
     def run
+      global_switches = []
+      global_switches << "--debug" if  logger.debug?
       case stage
       when 'dev'
-        system "drake #{argv_str}"
+        global_switches << "--no-config"
+        system "drake #{global_switches.join(" ")} #{argv_str}"
       when 'local'
-        if logger.debug?
-          system "drake --debug #{argv_str}"
-        else
-          system "drake #{argv_str}"
-        end
+        system "drake #{global_switches.join(" ")} #{argv_str}"
       else
         run_remote_task
       end
