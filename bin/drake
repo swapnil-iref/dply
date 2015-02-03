@@ -19,7 +19,7 @@ options = {
 opts_parser = OptionParser.new do |opts| 
     
     banner = [] 
-    banner << "Usage: dply [global options] command [options] args"
+    banner << "Usage: drake [global options] command [options] args"
     banner << "Commands:"
     banner << "    deploy"
     banner << "    switch"
@@ -28,7 +28,7 @@ opts_parser = OptionParser.new do |opts|
     banner << "Options: "
     opts.banner = banner.join("\n")
 
-    opts.on("-d", "--deploy-dir [DEPLOY DIR]" , "Set deploy dir") do |d| 
+    opts.on("-d", "--dir [DEPLOY DIR]" , "Set dir") do |d| 
       path = Pathname.new(d)
       raise ::Dply::Error, "deploy_dir path must be absolute" if path.relative?
       options[:deploy_dir] = path
@@ -76,6 +76,8 @@ begin
     require 'dply/cli/reload'
     cli = Dply::Cli::Reload.new(deploy_dir, config, ARGV)
     cli.run
+  when /[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+/
+    require 'dply/task_runner' 
   when :''
     puts opts_parser
   else

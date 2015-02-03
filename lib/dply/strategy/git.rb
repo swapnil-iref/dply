@@ -2,6 +2,7 @@ require 'dply/helper'
 require 'dply/setup'
 require 'dply/linker'
 require 'dply/config_downloader'
+require 'dply/yum'
 require 'forwardable'
 
 
@@ -33,6 +34,8 @@ module Dply
           current_version = git.commit_id
           link_dirs
           link_config_files
+          yum = Yum.new("pkgs.yml")
+          yum.install
           env = {
             "DPLY_PREVIOUS_VERSION" => previous_version,
             "DPLY_CURRENT_VERSION" => current_version

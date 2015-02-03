@@ -17,7 +17,7 @@ module Dply
       when "WARN"
         "#{severity.downcase.bold.yellow} #{msg}\n"
       else
-        "#{severity.downcase.bold.blue} #{msg}\n"
+        "#{severity[0].bold.blue} #{msg}\n"
       end
     end
 
