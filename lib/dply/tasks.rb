@@ -27,9 +27,9 @@ module Dply
 
     def rake_command
       if gemfile_exists?
-        "bundle exec rake -R dply"
+        "bundle exec rake -Nf dply/Rakefile -R dply"
       else
-        "rake -R dply"
+        "rake -Nf dply/Rakefile -R dply"
       end
     end
 

@@ -12,11 +12,13 @@ module Dply
       else
         logger.debug command
       end
+      command_arr = command.split
+
       if return_output
-        output = `#{env_str(env)} #{command}`
+        output = IO.popen(env, command_arr) { |f| f.read }
       else
         output = ""
-        system env, "#{command} 2>&1"
+        system(env, *command_arr, 2 => 1)
       end 
       return_value = $?.exitstatus
       error_msg ||= "non zero exit for \"#{command}\""
@@ -42,14 +44,6 @@ module Dply
       src_path = Pathname.new(src)
       dst = "#{destdir}/#{src_path.basename}"
       symlink src, dst
-    end
-
-    def env_str(env)
-      str = ""
-      env.each do |k,v|
-        str << %(#{k}="#{v.to_s}")
-      end
-      str
     end
 
     def stringify_values(hash)
