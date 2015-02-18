@@ -1,23 +1,27 @@
-require 'dply/helper'
+require 'dply/logger'
 module Dply
   class Lock
 
-    include Helper
-    attr_accessor :deploy_dir
+    include Logger
 
-    def initialize(deploy_dir)
-      @deploy_dir = deploy_dir
-    end
-
-    def lock_file
-      @lock_file ||= Dir.chdir(deploy_dir) do
-        File.open(".dply.lock", "w+")
-      end
+    def initialize(dir)
+      @dir = dir
     end
 
     def acquire
-      logger.debug "acquiring exclusive lock"
-      lock_file.flock(File::LOCK_EX)
+      logger.debug "acquiring lock"
+      lock_acquired = lock_file.flock(File::LOCK_NB | File::LOCK_EX)
+      raise "exclusive lock not available" if not lock_acquired
+    end
+
+    def lock_file
+      @lock_file ||= File.open("#{dir}/.dply.lock", "a+")
+    end
+
+    private
+
+    def dir
+      @dir ||= Dir.pwd
     end
 
   end
