@@ -65,8 +65,6 @@ module Dply
       set :config_download_url, url
     end
 
-
-
     def dir_map(map)
       set :dir_map, map
     end

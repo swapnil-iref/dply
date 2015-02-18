@@ -36,7 +36,7 @@ module Dply
       def opts
         OptionParser.new do |opts|
 
-          opts.banner = "Usage: drake deploy [options] [target]"
+          opts.banner = "Usage: dply deploy [options] [target]"
           
           opts.on("-b", "--branch [BRANCH]" , "Specify git branch") do |b|
             options[:branch] = b

@@ -4,7 +4,7 @@ module Dply
 
     include Logger
 
-    def initialize(dir)
+    def initialize(dir = nil)
       @dir = dir
     end
 

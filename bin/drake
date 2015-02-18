@@ -12,30 +12,21 @@ require 'dply/config'
 require 'pathname'
 
 logger = ::Dply::Logger.logger
-options = {
-  read_config: true
-}
 
+options = {}
 opts_parser = OptionParser.new do |opts| 
     
     banner = [] 
     banner << "Usage: drake [global options] command [options] args"
-    banner << "Commands:"
-    banner << "    deploy"
-    banner << "    switch"
-    banner << "    rollback"
+    banner << "Commands: deploy reload task"
     
     banner << "Options: "
     opts.banner = banner.join("\n")
 
     opts.on("-d", "--dir [DEPLOY DIR]" , "Set dir") do |d| 
       path = Pathname.new(d)
-      raise ::Dply::Error, "deploy_dir path must be absolute" if path.relative?
-      options[:deploy_dir] = path
-    end
-
-    opts.on("--no-config", "Do not read config file") do
-      options[:read_config] = false
+      raise ::Dply::Error, "dir path must be absolute" if path.relative?
+      options[:dir] = path
     end
 
     opts.on("-v", "--version", "Show version") do |v|
@@ -60,22 +51,22 @@ opts_parser = OptionParser.new do |opts|
     end 
 end
 
+def run_cli(command, argv)
+  require "dply/cli/#{command}"
+  const = "::Dply::Cli::#{command.capitalize}"
+  klass = Module.const_get const
+  cli = klass.new(argv)
+  cli.run
+end
+
 begin
   opts_parser.order!(ARGV)
-  deploy_dir = options[:deploy_dir] || Dir.pwd
-  Dir.chdir deploy_dir
-  config = Dply::Config.new(deploy_dir, read_config: options[:read_config]).to_struct
+  Dir.chdir options[:dir] if options[:dir]
 
   command = (ARGV.shift || "").to_sym
   case command
-  when :deploy
-    require 'dply/cli/deploy'
-    cli = Dply::Cli::Deploy.new(deploy_dir, config, ARGV)
-    cli.run
-  when :reload
-    require 'dply/cli/reload'
-    cli = Dply::Cli::Reload.new(deploy_dir, config, ARGV)
-    cli.run
+  when :deploy, :reload, :task
+    run_cli command, ARGV
   when /[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+/
     require 'dply/task_runner' 
   when :''

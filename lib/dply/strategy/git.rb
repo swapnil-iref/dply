@@ -103,6 +103,10 @@ module Dply
         @setup ||= Setup.load(:git, config)
       end
 
+      def tasks
+        @tasks ||= Tasks.new(deployment: true)
+      end
+
     end
   end
 end
