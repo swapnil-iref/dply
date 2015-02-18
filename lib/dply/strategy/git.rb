@@ -13,21 +13,19 @@ module Dply
       extend Forwardable
       include Helper
 
+      attr_reader :config, :options
       def_delegators :config, :target, :branch, :link_config,
                      :config_dir, :config_map, :dir_map, :config_skip_download,
                      :config_download_url
                 
-      
-      attr_reader :config, :options
-
       def initialize(config, options)
         @config = config
-        @options = options
+        @options = options || {}
       end
 
       def deploy
-        setup.run
-        config_downloader.download_all if config_download_url
+        setup.git
+        download_configs if config_download_url
         Dir.chdir current_dir do
           previous_version = git.commit_id
           git_step
@@ -36,20 +34,16 @@ module Dply
           link_config_files
           yum = Yum.new("pkgs.yml")
           yum.install
-          env = {
-            "DPLY_PREVIOUS_VERSION" => previous_version,
-            "DPLY_CURRENT_VERSION" => current_version
-          }
-          tasks.deploy target, env: env
+          tasks.deploy target
+          tasks.report_changes(previous_version, current_version)
         end
       end
 
-      def switch
-      end
-
       def reload
-        config_downloader.download_all if config_download_url
+        download_configs if config_download_url
         Dir.chdir current_dir do
+          link_dirs
+          link_config_files
           tasks.reload target
         end
       end
@@ -57,7 +51,14 @@ module Dply
       private
 
       def current_dir
-        @current_dir ||= "#{config.deploy_dir}/current"
+        @current_dir ||= "#{config.dir}/current"
+      end
+
+      def download_configs
+        files = config_map.values.uniq
+        downloader = ConfigDownloader.new(files, config_download_url)
+        downloader.skip_download = config_skip_download 
+        downloader.download_all
       end
 
       def git_step
@@ -83,7 +84,7 @@ module Dply
 
       def config_linker
         return @config_linker if @config_linker
-        source = "#{config.deploy_dir}/config"
+        source = "#{config.dir}/config"
         dest = current_dir
         @config_linker ||= ::Dply::Linker.new(source, dest, map: config_map)
       end
@@ -94,13 +95,13 @@ module Dply
 
       def dir_linker
         return @dir_linker if @dir_linker
-        source = "#{config.deploy_dir}/shared"
+        source = "#{config.dir}/shared"
         dest = current_dir
         @dir_linker ||= ::Dply::Linker.new(source, dest, map: dir_map)
       end
 
       def setup
-        @setup ||= Setup.load(:git, config)
+        @setup ||= Setup.new(@config)
       end
 
       def tasks

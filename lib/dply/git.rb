@@ -23,6 +23,10 @@ module Dply
       cmd "git clone #{repo} #{dir}"
     end
 
+    def self.clean
+      cmd "git clean -dxf "
+    end
+
     def self.get_tracking_branch(branch)
       command = "git for-each-ref --format='%(upstream:short)' refs/heads/#{branch} --count=1"
       tracking_branch = `#{command}`

@@ -1,15 +1,13 @@
-require 'dply/deploy'
 require 'dply/logger'
 require 'dply/lock'
-require 'dply/config'
+require 'dply/build'
+require 'dply/build_config'
 
 module Dply
   module Cli
-    class Deploy
+    class Build
 
       include Logger
-
-      attr_reader :argv
 
       def initialize(argv)
         @argv = argv
@@ -17,52 +15,52 @@ module Dply
 
       def run
         lock.acquire
-        opts.parse!(argv)
-        strategy.deploy
+        opts.parse!(@argv)
+        build.run
       end
 
-      def strategy
-        @strategy ||= Strategy.load(config, options)
-      end
-
-      def lock
-        @lock ||= Lock.new
+      def build
+        @build ||= ::Dply::Build.new(config)
       end
 
       def config
-       @config ||= Config.new.to_struct 
+        @config ||= ::Dply::BuildConfig.new.to_struct
+      end
+
+      def dir
+        @dir ||= Dir.pwd
+      end
+
+      def lock
+        @lock ||= ::Dply::Lock.new
       end
 
       def opts
         OptionParser.new do |opts|
 
-          opts.banner = "Usage: dply deploy [options] [target]"
+          opts.banner = "Usage: drake build [options] [target]"
           
           opts.on("-b", "--branch [BRANCH]" , "Specify git branch") do |b|
             config.branch = b
           end
 
+          opts.on("-r", "--revision [REVISION]", "Specify revision") do |r|
+            config.revision = r
+          end
+
           opts.on("--no-pull", "Enable/disable git pull") do |e|
-            options[:no_pull] = true
+            config.no_pull = true
           end
 
           opts.on("--skip-git", "Disable git") do |e|
-            options[:skip_git] = true
+            config.git = false
           end  
-          
-          opts.on("--skip-bundler", "Skip bundle install") do |e|
-            options[:skip_bundler] = true
-          end
 
           opts.on("-h", "--help", "Help") do
             puts opts
             exit
           end
         end
-      end
-
-      def options
-        @options ||= {}
       end
 
     end

@@ -2,58 +2,43 @@ require 'ostruct'
 require 'dply/helper'
 
 module Dply
-  class Config
+  class BuildConfig
 
     include Helper
-    attr_reader :read_config
 
-    def initialize(dir = nil, read_config: true)
-      @dir = dir || Dir.pwd
+    def initialize(dir: nil, read_config: true)
       @read_config = read_config
+      @dir = (dir || Dir.pwd)
     end
 
     def config
       return @config if @config
       @config = {
         dir: @dir,
-        target: :default,
+        task: "build:default",
         branch: :master,
-        strategy: :default,
         repo: nil,
+        git: true,
         env: {},
-        link_config: false,
         config_map: nil,
         dir_map: nil,
         shared_dirs: [],
         config_skip_download: [],
         config_download_url: nil
       }
-      read_from_file if read_config
+      read_from_file if @read_config
       return @config
-    end
-
-    def target(target)
-      set :target, target
     end
 
     def branch(branch)
       set :branch, branch
     end
 
-    def strategy(strategy)
-      set :strategy, strategy
-    end
-
     def repo(repo)
       set :repo, repo
     end
 
-    def link_config(link_config)
-      set :link_config, link_config
-    end
-
     def config_map(map)
-      set :link_config, true
       set :config_map, map
     end
 
@@ -90,7 +75,7 @@ module Dply
     end
 
     def config_file
-      @config_file ||= "#{@dir}/dply.rb"
+      @config_file ||= "#{@dir}/build.rb"
     end
 
     def shared_dirs(dirs)
@@ -100,10 +85,10 @@ module Dply
 
     def read_from_file
       if not File.readable? config_file
-        raise error "dply.rb not found in #{@dir}"
+        raise error "build.rb not found in #{@dir}"
         return
       end
-      instance_eval(File.read(config_file))
+      instance_eval(File.read(config_file), config_file)
     rescue NoMethodError => e
       raise error "invalid option used in config: #{e.name}"
     end
