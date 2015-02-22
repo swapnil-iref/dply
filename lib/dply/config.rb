@@ -1,5 +1,5 @@
-require 'ostruct'
 require 'dply/helper'
+require 'dply/config_struct'
 
 module Dply
   class Config
@@ -12,28 +12,25 @@ module Dply
       @read_config = read_config
     end
 
+    def to_struct
+      config
+    end
+
+    private 
+
     def config
       return @config if @config
-      @config = {
-        dir: @dir,
-        target: :default,
-        branch: :master,
-        strategy: :default,
-        repo: nil,
-        env: {},
-        link_config: false,
-        config_map: nil,
-        dir_map: nil,
-        shared_dirs: [],
-        config_skip_download: [],
-        config_download_url: nil
-      }
+      @config = ConfigStruct.new(@dir)
       read_from_file if read_config
       return @config
     end
 
-    def target(target)
-      set :target, target
+    def name(name)
+      set :name, name
+    end
+
+    def repo(repo)
+      set :repo, repo
     end
 
     def branch(branch)
@@ -41,72 +38,70 @@ module Dply
     end
 
     def strategy(strategy)
-      set :strategy, strategy
+      set :strategy, strategy.to_sym
     end
 
-    def repo(repo)
-      set :repo, repo
+    def target(target)
+      set :target, target
     end
 
-    def link_config(link_config)
-      set :link_config, link_config
+    def shared_dirs(dirs)
+      raise if not dirs.is_a? Array
+      set :shared_dirs, dirs
     end
 
     def config_map(map)
-      set :link_config, true
       set :config_map, map
-    end
-
-    def config_skip_download(list)
-      set :config_skip_download, list
-    end
-
-    def config_download_url(url)
-      set :config_download_url, url
     end
 
     def dir_map(map)
       set :dir_map, map
     end
 
-    def set_env(key, value)
-      @config[:env].store key, value
+    def config_download_url(url)
+      set :config_download_url, url
+    end
+
+    def config_skip_download(list)
+      set :config_skip_download, list
     end
 
     def set(key, value)
-      @config.store key, value
-    end
-
-    def to_struct
-      OpenStruct.new(config)
+      method = "#{key}=".to_sym
+      @config.send method, value
     end
 
     def env(h)
       raise if not h.is_a? Hash
-      @config[:env] = h
-      @config[:env].each do |k,v|
+      h.each do |k,v|
         ENV[k.to_s] = v.to_s
       end
     end
 
     def config_file
-      @config_file ||= "#{@dir}/dply.rb"
+      @config_file ||= begin
+        found = ["#{@dir}/deploy.rb", "#{@dir}/dply.rb"].find { |f| File.readable? f }
+        found || "#{@dir}/deploy.rb"
+      end
     end
 
-    def shared_dirs(dirs)
-      raise if not dirs.is_a? Array
-      @config[:shared_dirs] = dirs
+    def revision(&block)
+      set :revision_proc , block
+    end
+
+    def build_url(&block)
+      set :build_url_proc, block
     end
 
     def read_from_file
       if not File.readable? config_file
-        raise error "dply.rb not found in #{@dir}"
+        raise error "deploy.rb not found in #{@dir}"
         return
       end
       instance_eval(File.read(config_file))
     rescue NoMethodError => e
       raise error "invalid option used in config: #{e.name}"
     end
-
+  
   end
 end
