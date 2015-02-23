@@ -85,12 +85,12 @@ module Dply
 
     def read_from_file
       if not File.readable? config_file
-        raise error "build.rb not found in #{@dir}"
+        error "build.rb not found in #{@dir}"
         return
       end
       instance_eval(File.read(config_file), config_file)
     rescue NoMethodError => e
-      raise error "invalid option used in config: #{e.name}"
+      error "invalid option used in config: #{e.name}"
     end
 
   end

@@ -15,9 +15,9 @@ module Dply
       include Helper
 
       attr_reader :config, :options
-      def_delegators :config, :target, :branch,
+      def_delegators :config, :target, :branch, :revision, :name,
                      :config_map, :dir_map, :config_skip_download,
-                     :config_download_url
+                     :config_download_url, :build_url
                 
       def initialize(config, options)
         @config = config
@@ -72,10 +72,11 @@ module Dply
       end
 
       def install_release
+        release.verify_checksum = config.verify_checksum
         release.install
         Dir.chdir release.path do
           link_dirs
-          link_config_files
+          link_config
           yum_install
         end
       end
@@ -112,7 +113,7 @@ module Dply
       def link(source, map)
         return if not map
         logger.bullet "symlinking #{source}"
-        dest = current_dir
+        dest = "#{config.dir}/#{release.path}"
         linker = Linker.new(source, dest, map: map)
         linker.create_symlinks
       end

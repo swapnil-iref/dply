@@ -90,12 +90,12 @@ module Dply
 
     def read_from_file
       if not File.readable? config_file
-        raise error "#{config_file} not readable"
+        error "#{config_file} not readable"
         return
       end
       instance_eval(File.read(config_file), config_file)
     rescue NoMethodError => e
-       raise "invalid option used in config: #{e.name} #{e.message}"
+       error "invalid option used in config: #{e.name} #{e.message}"
     end
 
 

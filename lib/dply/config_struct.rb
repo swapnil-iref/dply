@@ -2,9 +2,10 @@ require 'dply/jenkins'
 module Dply
   class ConfigStruct
 
-    attr_writer :revision, :build_url, :build_url_proc, :revision_proc
+    attr_writer :revision, :build_url, :build_url_proc, 
+                :revision_proc
     attr_accessor :dir, :name, :repo, :branch, 
-                  :strategy, :target, 
+                  :strategy, :target, :verify_checksum, 
                   :config_map, :dir_map, :shared_dirs, 
                   :config_download_url, :config_skip_download 
 
@@ -12,6 +13,7 @@ module Dply
       @dir = dir || Dir.pwd
       @target = :default
       @branch = :master
+      @verify_checksum = true
     end
 
     def revision

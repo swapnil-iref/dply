@@ -5,19 +5,21 @@ module Dply
 
     include Helper
 
-    def initialize(url)
+    def initialize(url, verify_checksum: true)
       @url = url
-      @verify_checksum = true
+      @verify_checksum = verify_checksum
     end
 
     def extract_to(extraction_path)
-      download if not @downloaded
-      cmd "tar xf #{path} #{extraction_path}", display: true
+      download_file if not @downloaded
+      FileUtils.rm_rf extraction_path if File.exists? extraction_path
+      FileUtils.mkdir_p extraction_path
+      cmd "tar xf #{path} -C #{extraction_path}", display: true
     end
 
     private
 
-    def download
+    def download_file
       if File.exists? path
         download if not verify_checksum
       else
@@ -44,7 +46,7 @@ module Dply
     end
 
     def load_checksum
-      file = "tmp/cache/#{tar_name}.md5"
+      file = "tmp/cache/#{name}.md5"
       if File.exists? file
         checksum = File.read(file).chomp
         return checksum if checksum.size == 32
@@ -56,6 +58,7 @@ module Dply
     end
 
     def verify_checksum
+      return true if not @verify_checksum
       require 'digest'
       computed_checksum = Digest::MD5.file path
       computed_checksum == checksum
@@ -63,9 +66,9 @@ module Dply
 
     def download(url, outfile)
       logger.bullet "downloading #{url} to #{outfile}"
-      http_status = `curl -w "%{http_code}" -f -s -o 'config/#{outfile}' '#{url}' `
+      http_status = `curl -w "%{http_code}" -f -s -o '#{outfile}' '#{url}' `
       if http_status != "200"
-        raise error "failed to download #{outfile}, http status #{http_status}"
+        error "failed to download #{outfile}, http status #{http_status}"
       end
     end
   

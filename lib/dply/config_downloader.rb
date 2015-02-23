@@ -27,7 +27,7 @@ module Dply
       logger.bullet "downloading #{file}"
       http_status = `curl -w "%{http_code}" -f -s -o 'config/#{file}' '#{url}' `
       if http_status != "200"
-        raise error "failed to download #{file}, http status #{http_status}"
+        error "failed to download #{file}, http status #{http_status}"
       end
     end
 

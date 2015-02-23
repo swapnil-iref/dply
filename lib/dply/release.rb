@@ -6,21 +6,20 @@ module Dply
 
     include Helper
 
-    attr_accessor :url
+    attr_accessor :url, :verify_checksum
     attr_reader :name
 
     def initialize(revision, app_name: nil, branch: nil, url: nil)
       @revision = revision
       @branch = branch
       @app_name = app_name
-      @verify_checksum = true
       @url = url
     end
 
     def make_current
-      raise if not installed?
-      raise if not File.directory? path
-      symlink release_path, "current"
+      raise "cannot make not installed release current" if not installed?
+      raise "release path #{path} doesn't exist"  if not File.directory? path
+      symlink path, "current"
     end
 
     def install
@@ -29,6 +28,7 @@ module Dply
       path = "tmp/releases/#{name}"
       archive.extract_to path
       FileUtils.mv path, "releases"
+      @installed = true
     end
 
     def path
@@ -38,11 +38,11 @@ module Dply
     private
 
     def replace_dashes(str)
-      str.gsub(/-/, "_")
+      str.to_s.gsub(/-/, "_")
     end
 
     def archive
-      @archive ||= Archive.new(url)
+      @archive ||= Archive.new(url, verify_checksum: @verify_checksum)
     end
 
     def timestamp
@@ -65,7 +65,7 @@ module Dply
     end
 
     def name_without_ts
-      @name_without_ts ||= "#{revision}-#{replace_dashes(@app_name)}-#{replace_dashes(@branch)}-"
+      @name_without_ts ||= "#{@revision}-#{replace_dashes(@app_name)}-#{replace_dashes(@branch)}-"
     end
 
   end

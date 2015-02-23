@@ -42,6 +42,10 @@ module Dply
             config.branch = b
           end
 
+          opts.on("-r", "--revision [REVISION]", "Specify build revision (only used in archive strategy)") do |r|
+            config.revision = r
+          end
+
           opts.on("--no-pull", "Enable/disable git pull") do |e|
             options[:no_pull] = true
           end

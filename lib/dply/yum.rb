@@ -46,7 +46,7 @@ module Dply
       end
       YAML.load_file(@pkgs_yml)
     rescue => e
-      raise error "error loading pkgs list" 
+      error "error loading pkgs list" 
     end
 
   end

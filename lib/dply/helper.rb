@@ -18,7 +18,7 @@ module Dply
     end
 
     def error(msg)
-      ::Dply::Error.new(msg)
+      raise ::Dply::Error, msg
     end
 
   end

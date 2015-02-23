@@ -66,6 +66,11 @@ module Dply
       set :config_skip_download, list
     end
 
+    def verify_checksum(verify_checksum)
+      set :verify_checksum, verify_checksum
+    end
+
+
     def set(key, value)
       method = "#{key}=".to_sym
       @config.send method, value
@@ -95,12 +100,12 @@ module Dply
 
     def read_from_file
       if not File.readable? config_file
-        raise error "deploy.rb not found in #{@dir}"
+        error "deploy.rb not found in #{@dir}"
         return
       end
       instance_eval(File.read(config_file))
     rescue NoMethodError => e
-      raise error "invalid option used in config: #{e.name}"
+      error "invalid option used in config: #{e.name}"
     end
   
   end
