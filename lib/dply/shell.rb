@@ -1,4 +1,5 @@
 require 'dply/error'
+require 'dply/logger'
 
 module Dply
   module Shell

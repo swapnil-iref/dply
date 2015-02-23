@@ -3,12 +3,13 @@ require 'dply/setup'
 require 'dply/linker'
 require 'dply/config_downloader'
 require 'dply/yum'
+require 'dply/release'
 require 'forwardable'
 
 
 module Dply
   module Strategy
-    class Git
+    class Archive
       
       extend Forwardable
       include Helper
@@ -24,25 +25,23 @@ module Dply
       end
 
       def deploy
-        setup.git
+        setup.archive
         download_configs if config_download_url
+        install_release
+        release.make_current
+        previous_version = get_release
         Dir.chdir current_dir do
-          previous_version = git.commit_id
-          git_step
-          current_version = git.commit_id
-          link_dirs
-          link_config
-          yum_install
           tasks.deploy target
-#          tasks.report_changes(previous_version, current_version)
         end
+        current_version = get_release
+#       tasks.report_changes(previous_version, current_version)
       end
-
+      
       def reload
         download_configs if config_download_url
         Dir.chdir current_dir do
           link_dirs
-          link_config_files
+          link_config
           tasks.reload target
         end
       end
@@ -53,11 +52,36 @@ module Dply
         @current_dir ||= "#{config.dir}/current"
       end
 
+      def get_release
+        File.basename (File.readlink current_dir)
+      end
+
       def download_configs
         files = config_map.values.uniq
         downloader = ConfigDownloader.new(files, config_download_url)
         downloader.skip_download = config_skip_download 
         downloader.download_all
+      end
+
+      def release
+        @release ||= Release.new(
+          revision, branch: branch,
+          app_name: config.name,
+          url: config.build_url
+        )
+      end
+
+      def install_release
+        release.install
+        Dir.chdir release.path do
+          link_dirs
+          link_config_files
+          yum_install
+        end
+      end
+
+      def yum_install
+        Yum.new("pkgs.yml").install
       end
 
       def git_step
@@ -77,10 +101,6 @@ module Dply
         link "#{config.dir}/config", config_map
       end
 
-      def yum_install
-        Yum.new("pkgs.yml").install
-      end
-
       def setup
         @setup ||= Setup.new(@config)
       end
@@ -96,6 +116,7 @@ module Dply
         linker = Linker.new(source, dest, map: map)
         linker.create_symlinks
       end
+
 
     end
   end
