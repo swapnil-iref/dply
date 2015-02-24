@@ -28,7 +28,7 @@ module Dply
     end
 
     def archive
-      dirs = ["config", "shared", "releases", "tmp/cache", "tmp/releases"]
+      dirs = ["config", "shared", "releases", "tmp/cache"]
       create_dirs dirs
       create_shared_dirs
     end

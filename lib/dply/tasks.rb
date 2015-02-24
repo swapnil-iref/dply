@@ -1,5 +1,6 @@
 require 'dply/shell'
 require 'dply/bundle'
+require 'json'
 module Dply
   class Tasks
 
@@ -32,6 +33,13 @@ module Dply
 
     def rake(task)
       bundle.rake task
+    end
+
+    def report_changes(previous_version, current_version)
+      info = {}
+      info[:current] = current_version
+      info[:previous] = previous_version
+      logger.remote "#{JSON.dump info}"
     end
 
     private

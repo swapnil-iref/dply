@@ -29,6 +29,10 @@ opts_parser = OptionParser.new do |opts|
       options[:dir] = path
     end
 
+    opts.on("--remote" , "Set remote mode") do
+      logger.remote_mode = true
+    end
+
     opts.on("-v", "--version", "Show version") do |v|
       puts ::Dply::VERSION
       exit
@@ -43,6 +47,7 @@ opts_parser = OptionParser.new do |opts|
       options[:debug] = true
       options[:trace] = true
       logger.level = ::Logger::DEBUG
+      logger.trace_mode = true
     end
 
     opts.on_tail("-h", "--help", "Show this message") do 

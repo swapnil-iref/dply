@@ -34,7 +34,7 @@ module Dply
           tasks.deploy target
         end
         current_version = get_release
-#       tasks.report_changes(previous_version, current_version)
+        tasks.report_changes(previous_version, current_version)
       end
       
       def reload

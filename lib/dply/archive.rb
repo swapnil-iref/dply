@@ -17,6 +17,11 @@ module Dply
       cmd "tar xf #{path} -C #{extraction_path}", display: true
     end
 
+    def clean
+      logger.trace "cleaning cache"
+      files = [ "tmp/cache/#{name}", "tmp/cache/#{name}.md5" ]
+      files.each { |f| FileUtils.rm f if File.exists? f }
+    end
     private
 
     def download_file
@@ -28,7 +33,7 @@ module Dply
       raise if not verify_checksum
       @downloaded = true
     end
-
+    
     def uri
       @uri ||= URI.parse(@url)
     end

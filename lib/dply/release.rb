@@ -1,5 +1,6 @@
 require 'dply/archive'
 require 'dply/helper'
+require 'tmpdir'
 
 module Dply
   class Release
@@ -25,10 +26,13 @@ module Dply
     def install
       return if installed?
       @name = name_without_ts + timestamp
-      path = "tmp/releases/#{name}"
-      archive.extract_to path
-      FileUtils.mv path, "releases"
+      Dir.mktmpdir "tmp" do |d|
+        path = "#{d}/#{name}"
+        archive.extract_to path
+        FileUtils.mv path, "releases"
+      end
       @installed = true
+      archive.clean
     end
 
     def path
