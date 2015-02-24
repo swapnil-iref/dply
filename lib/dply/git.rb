@@ -24,6 +24,7 @@ module Dply
     end
 
     def self.clean
+      cmd "git reset --hard HEAD"
       cmd "git clean -dxf "
     end
 
