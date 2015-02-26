@@ -13,6 +13,10 @@ module Dplyr
       @tasks[name.to_sym] = block
     end
 
+    def get_task
+      
+    end
+
     private
 
     def read_from_file

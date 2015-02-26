@@ -28,7 +28,7 @@ module Dplyr
     end
 
     def stage_data
-      @stage_data ||= StagesConfig.new("stages.rb").get_stage(stage)
+      @stage_data ||= StagesConfig.new.fetch(@stage).data
     end
 
     def hosts

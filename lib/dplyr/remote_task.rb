@@ -77,11 +77,11 @@ module Dplyr
     def remote_cmd(host_info)
       user = host_info[:user]
       host = host_info[:host]
-      deploy_dir = host_info[:deploy_dir]
+      dir = host_info[:dir]
       if logger.debug?
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --debug -d #{deploy_dir} #{task} 2>&1")
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --debug -d #{dir} #{task} 2>&1")
       else
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake -d #{deploy_dir} #{task} 2>&1" 2>/dev/null)
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake -d #{dir} #{task} 2>&1" 2>/dev/null)
       end
     end
 
