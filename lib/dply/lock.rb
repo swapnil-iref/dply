@@ -1,8 +1,8 @@
-require 'dply/logger'
+require 'dply/helper'
 module Dply
   class Lock
 
-    include Logger
+    include Helper
 
     def initialize(dir = nil)
       @dir = dir
@@ -11,7 +11,7 @@ module Dply
     def acquire
       logger.debug "acquiring lock"
       lock_acquired = lock_file.flock(File::LOCK_NB | File::LOCK_EX)
-      raise "exclusive lock not available" if not lock_acquired
+      error "exclusive lock not available" if not lock_acquired
     end
 
     def lock_file

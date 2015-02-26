@@ -5,6 +5,7 @@ require 'dply/config_downloader'
 require 'dply/yum'
 require 'dply/tasks'
 require 'forwardable'
+require 'digest'
 
 module Dply
   class Build
@@ -33,6 +34,7 @@ module Dply
         clean_build_dir
         link_build_dir
         tasks.build config.task
+        generate_checksum
       end
     end
 
@@ -60,28 +62,23 @@ module Dply
     end
 
     def link_dirs
-      return if not dir_map
-      logger.bullet "symlinking shared dirs"
-      source = "#{config.dir}/shared"
-      link source , dir_map
+      link "#{config.dir}/shared", dir_map
     end
 
     def link_config
-      return if not config_map
-      logger.bullet "symlinking config files"
-      source = "#{config.dir}/config"
-      link source, config_map  
-    end
-
-    def yum_install
-      yum = Yum.new("pkgs.yml")
-      yum.install
+      link "#{config.dir}/config", config_map
     end
 
     def link(source, map)
+      return if not map
+      logger.bullet "symlinking #{source}"
       dest = repo_dir
       linker = Linker.new(source, dest, map: map)
       linker.create_symlinks
+    end
+
+    def yum_install
+      Yum.new("pkgs.yml").install
     end
 
     def clean_build_dir
@@ -102,6 +99,14 @@ module Dply
 
     def build_dir
       @build_dir ||= "#{config.dir}/build"
+    end
+
+    def generate_checksum
+      Dir["#{build_dir}/*"].each do |f|
+        checksum = Digest::MD5.file f
+        checksum_file = "#{f}.md5"
+        File.open(checksum_file, 'w') { |cf| cf.write checksum }
+      end
     end
 
     def tasks

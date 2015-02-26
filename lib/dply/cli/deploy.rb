@@ -1,4 +1,4 @@
-require 'dply/deploy'
+require 'dply/strategy'
 require 'dply/logger'
 require 'dply/lock'
 require 'dply/config'
