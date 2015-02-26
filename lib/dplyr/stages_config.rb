@@ -1,9 +1,9 @@
 require 'dply/helper'
 
-module Dply
+module Dplyr
   class StagesConfig
     
-    include Helper  
+    include ::Dply::Helper  
     attr_reader :config_file
     attr_accessor :current_stage
 

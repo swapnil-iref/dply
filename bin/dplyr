@@ -5,7 +5,7 @@ require 'optparse'
 require 'dply/error'
 require 'dply/version'
 require 'dply/logger'
-require 'dply/dplyr'
+require 'dplyr/cli'
 require 'pathname'
 
 logger = ::Dply::Logger.logger
@@ -57,7 +57,7 @@ begin
 
   stage = ARGV.shift
 
-  dplyr = ::Dply::Dplyr.new(stage, ARGV)
+  dplyr = ::Dplyr::Cli.new(stage, ARGV)
   dplyr.run
 
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument, ::Dply::Error => e

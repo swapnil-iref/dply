@@ -1,11 +1,11 @@
 require 'pty'
-require 'dply/report'
+require 'dplyr/report'
 require 'dply/logger'
 
-module Dply
+module Dplyr
   class RemoteTask
 
-    include Logger
+    include ::Dply::Logger
     
     attr_reader :hosts, :parallel_jobs, :task, :env
 

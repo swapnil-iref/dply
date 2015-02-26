@@ -1,4 +1,4 @@
-module Dply
+module Dplyr
   class Report
 
     attr_reader :hosts, :exit_statuses 

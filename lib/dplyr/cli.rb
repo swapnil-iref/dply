@@ -1,11 +1,11 @@
-require 'dply/stages_config'
-require 'dply/remote_task'
+require 'dplyr/stages_config'
+require 'dplyr/remote_task'
 require 'dply/logger'
 
-module Dply
-  class Dplyr
+module Dplyr
+  class Cli
 
-    include Logger
+    include ::Dply::Logger
 
     attr_reader :stage, :argv
     def initialize(stage, argv)
@@ -52,7 +52,7 @@ module Dply
     end
 
     def run_remote_task
-      remote_task = ::Dply::RemoteTask.new(hosts, argv_str, parallel_jobs: parallel_jobs, env: env_str)
+      remote_task = RemoteTask.new(hosts, argv_str, parallel_jobs: parallel_jobs, env: env_str)
       remote_task.run
     end
 
