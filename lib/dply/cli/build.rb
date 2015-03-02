@@ -52,6 +52,10 @@ module Dply
             config.no_pull = true
           end
 
+          opts.on("--use-yum", "use yum to install packages") do |e|
+            config.use_yum = true
+          end
+
           opts.on("--skip-git", "Disable git") do |e|
             config.git = false
           end  

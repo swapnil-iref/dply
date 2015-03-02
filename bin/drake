@@ -54,8 +54,10 @@ opts_parser = OptionParser.new do |opts|
 end
 
 def run_cli(command, argv)
+  command = command.to_s.gsub("-", "_")
   require "dply/cli/#{command}"
-  const = "::Dply::Cli::#{command.capitalize}"
+  klass_name = command.split('_').collect(&:capitalize).join
+  const = "::Dply::Cli::#{klass_name}"
   klass = Module.const_get const
   cli = klass.new(argv)
   cli.run
@@ -67,7 +69,7 @@ begin
 
   command = (ARGV.shift || "").to_sym
   case command
-  when :deploy, :reload, :task, :build
+  when :deploy, :reload, :task, :build, :depcheck, :"install-pkgs"
     run_cli command, ARGV
   when /[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+/
     require 'dply/task_runner' 

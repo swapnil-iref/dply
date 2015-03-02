@@ -58,6 +58,10 @@ module Dply
             options[:skip_bundler] = true
           end
 
+          opts.on("--use-yum", "use yum to install packages") do |e|
+            options[:use_yum] = true
+          end
+
           opts.on("-h", "--help", "Help") do
             puts opts
             exit

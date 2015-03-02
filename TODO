@@ -1,0 +1,3 @@
+- packages.yml
+- rpm -V --nofiles --nodeps --noscripts rbgem-bundler rbgem-unicorn ImageMagick-devel ImageMagick readline-devel zlib-devel nodejs geos1-devel
+- sudo yum install

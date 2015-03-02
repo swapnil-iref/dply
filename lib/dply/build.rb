@@ -30,7 +30,7 @@ module Dply
         git.clean
         link_dirs
         link_config
-        yum_install
+        install_pkgs
         clean_build_dir
         link_build_dir
         tasks.build config.task
@@ -77,8 +77,8 @@ module Dply
       linker.create_symlinks
     end
 
-    def yum_install
-      Yum.new("pkgs.yml").install
+    def install_pkgs
+      tasks.install_pkgs(build_mode: true, use_yum: config.use_yum)
     end
 
     def clean_build_dir

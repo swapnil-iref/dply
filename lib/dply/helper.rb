@@ -1,8 +1,6 @@
-require 'dply/tasks'
 require 'dply/shell'
 require 'dply/git'
 require 'dply/error'
-
 
 module Dply
   module Helper

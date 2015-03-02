@@ -1,4 +1,5 @@
 require 'dply/helper'
+require 'dply/tasks'
 require 'dply/setup'
 require 'dply/linker'
 require 'dply/config_downloader'
@@ -28,8 +29,8 @@ module Dply
         setup.archive
         download_configs if config_download_url
         install_release
-        release.make_current
         previous_version = get_release
+        release.make_current
         Dir.chdir current_dir do
           tasks.deploy target
         end
@@ -77,12 +78,8 @@ module Dply
         Dir.chdir release.path do
           link_dirs
           link_config
-          yum_install
+          tasks.install_pkgs(use_yum: options[:use_yum])
         end
-      end
-
-      def yum_install
-        Yum.new("pkgs.yml").install
       end
 
       def git_step
@@ -117,7 +114,6 @@ module Dply
         linker = Linker.new(source, dest, map: map)
         linker.create_symlinks
       end
-
 
     end
   end

@@ -32,9 +32,9 @@ module Dply
           current_version = git.commit_id
           link_dirs
           link_config
-          yum_install
+          install_pkgs
           tasks.deploy target
-#          tasks.report_changes(previous_version, current_version)
+          tasks.report_changes(previous_version, current_version)
         end
       end
 
@@ -42,7 +42,7 @@ module Dply
         download_configs if config_download_url
         Dir.chdir current_dir do
           link_dirs
-          link_config_files
+          link_config
           tasks.reload target
         end
       end
@@ -77,8 +77,8 @@ module Dply
         link "#{config.dir}/config", config_map
       end
 
-      def yum_install
-        Yum.new("pkgs.yml").install
+      def install_pkgs
+        tasks.install_pkgs(use_yum: options[:use_yum])
       end
 
       def setup

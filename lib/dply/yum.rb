@@ -1,28 +1,31 @@
 require 'dply/helper'
-require 'yaml'
 
 module Dply
   class Yum
 
     include Helper
 
-    def initialize(pkgs_yml)
-      @pkgs_yml = pkgs_yml
-    end
-
-    def pkgs
-      @pkgs ||= load_pkgs
+    def initialize(pkgs, sudo: false)
+      if pkgs.is_a? Set
+        @pkgs = pkgs.to_a
+      else
+        @pkgs = pkgs
+      end
+      @sudo = sudo
     end
 
     def install
       return if installed?
-      cmd "sudo -n yum install -y #{not_installed_pkgs.join(' ')}"
+      command = ""
+      command << "sudo -n " if @sudo
+      command << "yum install -y #{not_installed_pkgs.join(' ')}"
+      cmd command
     end
 
     private
 
     def pkgs_str
-      pkgs.join " "
+      @pkgs.join " "
     end
 
     def not_installed_pkgs
@@ -37,16 +40,6 @@ module Dply
 
     def installed?
       not_installed_pkgs.size == 0
-    end
-
-    def load_pkgs
-      if not File.readable? @pkgs_yml
-        logger.debug "skipping yum pkgs"
-        return []
-      end
-      YAML.load_file(@pkgs_yml)
-    rescue => e
-      error "error loading pkgs list" 
     end
 
   end
