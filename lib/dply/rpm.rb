@@ -19,7 +19,7 @@ module Dply
     end
 
     def filtered?(pkg)
-      @filtered ||= ["glibc", "libgcc", "libstdc++", "openssl", "ruby-alt"]
+      @filtered ||= ["glibc", "libgcc", "libstdc++", "openssl", "ruby-alt", "jemalloc"]
       @filtered.include? pkg.strip
     end
 
