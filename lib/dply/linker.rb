@@ -19,6 +19,7 @@ module Dply
         source = link_source(f)
         relative_source = link_relative_source(source, target)
         logger.debug "linking #{target} -> #{source}"
+        error "source #{source} doesn't exist" if not File.exist? source
         symlink(relative_source, target)
       end
     end
