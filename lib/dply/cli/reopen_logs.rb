@@ -5,7 +5,7 @@ require 'dply/config'
 
 module Dply
   module Cli
-    class Reload
+    class ReopenLogs
 
       include Logger
 
@@ -15,7 +15,7 @@ module Dply
 
       def run
         lock.acquire
-        strategy.reload
+        strategy.reopen_logs
       end
 
       def strategy
