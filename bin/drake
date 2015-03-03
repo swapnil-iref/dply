@@ -69,10 +69,11 @@ begin
 
   command = (ARGV.shift || "").to_sym
   case command
-  when :deploy, :reload, :task, :build, :depcheck, :"install-pkgs"
+  when :deploy, :reload, :task, :build, :depcheck, :"install-pkgs", :reopen_logs
     run_cli command, ARGV
-  when /[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+/
-    require 'dply/task_runner' 
+  when /\A[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+\z/
+    require 'dply/tasks'
+    ::Dply::Tasks.new.rake command
   when :''
     puts opts_parser
   else

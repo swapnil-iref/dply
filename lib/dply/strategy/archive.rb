@@ -48,9 +48,11 @@ module Dply
       end
 
       def reopen_logs
-        Dir.chdir current_dir do
-          tasks.rake "#{target}:reopen_logs" 
-        end
+        Dir.chdir(current_dir) { tasks.rake "#{target}:reopen_logs" }
+      end
+
+      def task(task_name)
+        Dir.chdir(current_dir) { tasks.task task_name }
       end
 
       private
