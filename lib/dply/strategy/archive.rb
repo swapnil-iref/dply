@@ -54,6 +54,7 @@ module Dply
       end
 
       def get_release
+        return "NA" if not File.symlink? current_dir
         File.basename (File.readlink current_dir)
       end
 
