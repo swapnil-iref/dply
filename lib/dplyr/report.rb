@@ -3,9 +3,10 @@ module Dplyr
 
     attr_reader :hosts, :exit_statuses 
 
-    def initialize(hosts, exit_statuses)
+    def initialize(hosts, exit_statuses, messages)
       @hosts = hosts
       @exit_statuses = exit_statuses
+      @messages = messages
     end
 
 
@@ -30,7 +31,10 @@ module Dplyr
     def print_successful_jobs
       puts "succeeded".green
       succeeded.each do |host|
-        puts " - #{host[:id]}"
+        messages = @messages[host] 
+        puts " - #{host[:id]}:"
+        next if not messages.is_a? Array
+        messages.each { |m| puts "   #{m}"}
       end
     end
 

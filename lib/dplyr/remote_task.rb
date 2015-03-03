@@ -79,21 +79,26 @@ module Dplyr
       host = host_info[:host]
       dir = host_info[:dir]
       if logger.debug?
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --debug -d #{dir} #{task} 2>&1")
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --remote --debug -d #{dir} #{task} 2>&1")
       else
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake -d #{dir} #{task} 2>&1" 2>/dev/null)
+        %(ssh -tt -oBatchMode=yes -l #{user} #{host} "#{env} drake --remote -d #{dir} #{task} 2>&1" 2>/dev/null)
       end
     end
 
     def pty_read(file, id)
       file.each do |line|
-        printf @job_output_template, id, line
+        if line =~ /\Adply_msg\|/
+          receive_message line
+        else
+          printf @job_output_template, id, line
+        end
       end
     rescue EOFError,Errno::ECONNRESET, Errno::EPIPE, Errno::EIO => e
     end
 
     def popen(cmd, host_info)
-      t = Thread.new do
+      t = Thread.new do |t|
+        Thread.current[:messages] = []
         begin
           r, w, pid = PTY.spawn(cmd)
           pty_read(r, host_info[:id])
@@ -118,8 +123,25 @@ module Dplyr
       end
     end
 
+    def receive_message(msg_str)
+      msg = msg_str.partition("|")[2].strip
+      return if msg.empty?
+      messages = Thread.current[:messages]
+      messages << msg
+    end
+
     def report
-      @report ||= Report.new(hosts, exit_statuses)
+      @report ||= Report.new(hosts, exit_statuses, messages)
+    end
+
+    def messages
+      @messages ||= begin
+        m = {}
+        @threads.each do |host, thread|
+          m[host] = thread[:messages]
+        end
+        m
+      end
     end
 
     def exit_statuses

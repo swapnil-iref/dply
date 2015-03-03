@@ -42,7 +42,7 @@ module Dply
       info = {}
       info[:current] = current_version
       info[:previous] = previous_version
-      logger.remote "#{JSON.dump info}"
+      logger.remote "#{previous_version} => #{current_version}"
     end
 
     def install_pkgs(build_mode: false, use_yum: false)
