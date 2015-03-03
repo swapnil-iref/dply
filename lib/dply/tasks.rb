@@ -46,7 +46,8 @@ module Dply
     end
 
     def install_pkgs(build_mode: false, use_yum: false)
-      if use_yum
+      drake_exists = File.exists? (drake_command)
+      if use_yum || !drake_exists
         yum_install build_mode
       else
         command_install build_mode
@@ -65,10 +66,13 @@ module Dply
     end
 
     def command_install(build_mode)
-      drake_command = ENV["DRAKE_COMMAND"] || "/opt/ruby/bin/drake"
       command = "sudo -n #{drake_command} install-pkgs"
       command << " -b" if build_mode
       cmd command
+    end
+
+    def drake_command
+      @drake_command ||= (ENV["DRAKE_COMMAND"] || "/opt/ruby/bin/drake")
     end
 
   end

@@ -90,8 +90,13 @@ module Dply
       end
     end
 
-    def revision(&block)
+    def revision(revision = nil, &block)
+      if revision
+        set :revision, revision
+        return
+      end
       set :revision_proc , block
+      set :revision, :latest
     end
 
     def build_url(&block)

@@ -17,7 +17,11 @@ module Dply
     end
 
     def revision
-      @revision ||= instance_eval(&revision_proc)
+      if @revision == :latest
+        @revision = instance_eval(&revision_proc)
+      else
+        @revision
+      end
     end
 
     def build_url
