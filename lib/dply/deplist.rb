@@ -75,6 +75,8 @@ module Dply
         return [] if not ef.has_section? ".dynamic"
         ef[".dynamic"].needed_libraries.keys
       end
+    rescue
+      return []
     end
 
     def rpm

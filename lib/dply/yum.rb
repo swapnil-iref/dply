@@ -20,6 +20,10 @@ module Dply
       command << "sudo -n " if @sudo
       command << "yum install -y #{not_installed_pkgs.join(' ')}"
       cmd command
+      not_installed = query_not_installed
+      if not_installed.size != 0
+        error "following pkgs not installed: #{not_installed.join(" ")}"
+      end
     end
 
     private
