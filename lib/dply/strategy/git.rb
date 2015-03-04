@@ -3,6 +3,7 @@ require 'dply/setup'
 require 'dply/linker'
 require 'dply/config_downloader'
 require 'dply/yum'
+require 'dply/tasks'
 require 'forwardable'
 
 

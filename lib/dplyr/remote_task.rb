@@ -14,6 +14,7 @@ module Dplyr
       @parallel_jobs = parallel_jobs
       @task = task
       @env = env
+      @env << " PATH=/usr/sbin:/usr/local/sbin:$PATH"
     end
 
     def run
