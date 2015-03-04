@@ -14,6 +14,7 @@ module Dply
       @target = :default
       @branch = :master
       @verify_checksum = true
+      @shared_dirs = []
     end
 
     def revision
