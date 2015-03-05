@@ -119,7 +119,7 @@ module Dply
       def link(source, map)
         return if not map
         logger.bullet "symlinking #{source}"
-        dest = "#{config.dir}/#{release.path}"
+        dest = Dir.pwd
         linker = Linker.new(source, dest, map: map)
         linker.create_symlinks
       end

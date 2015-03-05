@@ -34,6 +34,10 @@ module Dply
       set :branch, branch
     end
 
+    def task(task)
+      set :task, task
+    end
+
     def repo(repo)
       set :repo, repo
     end
