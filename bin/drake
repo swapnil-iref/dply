@@ -8,6 +8,8 @@ require 'dply/logger'
 require 'dply/config'
 require 'pathname'
 
+File.umask 0022
+
 logger = ::Dply::Logger.logger
 
 options = {}
