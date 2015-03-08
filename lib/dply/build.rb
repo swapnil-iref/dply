@@ -1,6 +1,5 @@
 require 'dply/helper'
 require 'dply/setup'
-require 'dply/linker'
 require 'dply/config_downloader'
 require 'dply/yum'
 require 'dply/tasks'
@@ -28,8 +27,7 @@ module Dply
       Dir.chdir repo_dir do
         git_step
         git.clean
-        link_dirs
-        link_config
+        link_all
         install_pkgs
         clean_build_dir
         link_build_dir
@@ -61,20 +59,9 @@ module Dply
       end
     end
 
-    def link_dirs
+    def link_all
       link "#{config.dir}/shared", dir_map
-    end
-
-    def link_config
       link "#{config.dir}/config", config_map
-    end
-
-    def link(source, map)
-      return if not map
-      logger.bullet "symlinking #{source}"
-      dest = repo_dir
-      linker = Linker.new(source, dest, map: map)
-      linker.create_symlinks
     end
 
     def install_pkgs

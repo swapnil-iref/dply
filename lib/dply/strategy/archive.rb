@@ -1,7 +1,6 @@
 require 'dply/helper'
 require 'dply/tasks'
 require 'dply/setup'
-require 'dply/linker'
 require 'dply/config_downloader'
 require 'dply/yum'
 require 'dply/release'
@@ -41,8 +40,7 @@ module Dply
       def reload
         download_configs if config_download_url
         Dir.chdir current_dir do
-          link_dirs
-          link_config
+          link_all
           tasks.reload target
         end
       end
@@ -85,8 +83,7 @@ module Dply
         release.verify_checksum = config.verify_checksum
         release.install
         Dir.chdir release.path do
-          link_dirs
-          link_config
+          link_all
           tasks.install_pkgs(use_yum: options[:use_yum])
         end
       end
@@ -100,12 +97,9 @@ module Dply
         end
       end
 
-      def link_dirs
-        link "#{config.dir}/shared", dir_map
-      end
-
-      def link_config
-        link "#{config.dir}/config", config_map
+      def link_all
+        tasks.link "#{config.dir}/shared", dir_map
+        tasks.link "#{config.dir}/config", config_map
       end
 
       def setup
@@ -114,14 +108,6 @@ module Dply
 
       def tasks
         @tasks ||= Tasks.new(deployment: true)
-      end
-
-      def link(source, map)
-        return if not map
-        logger.bullet "symlinking #{source}"
-        dest = Dir.pwd
-        linker = Linker.new(source, dest, map: map)
-        linker.create_symlinks
       end
 
     end

@@ -2,6 +2,7 @@ require 'json'
 require 'dply/shell'
 require 'dply/bundle'
 require 'dply/yum'
+require 'dply/linker'
 require 'dply/pkgs_config'
 
 module Dply
@@ -52,6 +53,14 @@ module Dply
       else
         command_install build_mode
       end
+    end
+
+    def link(source, map)
+      return if not map
+      logger.bullet "symlinking #{source}"
+      dest = Dir.pwd
+      linker = Linker.new(source, dest, map: map)
+      linker.create_symlinks
     end
 
     private

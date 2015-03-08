@@ -1,6 +1,5 @@
 require 'dply/helper'
 require 'dply/setup'
-require 'dply/linker'
 require 'dply/config_downloader'
 require 'dply/yum'
 require 'dply/tasks'
@@ -31,8 +30,7 @@ module Dply
           previous_version = git.commit_id
           git_step
           current_version = git.commit_id
-          link_dirs
-          link_config
+          link_all
           install_pkgs
           tasks.deploy target
           tasks.report_changes(previous_version, current_version)
@@ -42,8 +40,7 @@ module Dply
       def reload
         download_configs if config_download_url
         Dir.chdir current_dir do
-          link_dirs
-          link_config
+          link_all
           tasks.reload target
         end
       end
@@ -78,12 +75,9 @@ module Dply
         end
       end
 
-      def link_dirs
-        link "#{config.dir}/shared", dir_map
-      end
-
-      def link_config
-        link "#{config.dir}/config", config_map
+      def link_all
+        tasks.link "#{config.dir}/shared", dir_map
+        tasks.link "#{config.dir}/config", config_map
       end
 
       def install_pkgs
@@ -96,14 +90,6 @@ module Dply
 
       def tasks
         @tasks ||= Tasks.new(deployment: true)
-      end
-
-      def link(source, map)
-        return if not map
-        logger.bullet "symlinking #{source}"
-        dest = current_dir
-        linker = Linker.new(source, dest, map: map)
-        linker.create_symlinks
       end
 
     end
