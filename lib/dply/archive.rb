@@ -26,7 +26,7 @@ module Dply
 
     def download_file
       if File.exists? path
-        download if not verify_checksum
+        download(uri, path) if not verify_checksum
       else
         download(uri, path)
       end
