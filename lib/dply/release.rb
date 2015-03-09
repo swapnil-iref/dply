@@ -33,8 +33,8 @@ module Dply
     end
 
     def make_current
-      raise "cannot make not installed release current" if not installed?
-      raise "release path #{path} doesn't exist"  if not File.directory? path
+      error "cannot make not installed release current" if not installed?
+      error "release path #{path} doesn't exist"  if not File.directory? path
       symlink path, "current"
     end
 
@@ -65,6 +65,11 @@ module Dply
 
     def already_deployed?
       File.exist? "#{path}/.deployed"
+    end
+
+    def current?
+      return false if not File.symlink? "current"
+      File.basename(File.readlink "current") == name
     end
 
     private

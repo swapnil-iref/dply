@@ -26,6 +26,12 @@ module Dply
 
       def deploy
         setup.archive
+        if release.already_deployed? && release.current?
+          logger.info "revision #{revision} is currently deployed"
+          current_version = previous_version = get_release
+          tasks.report_changes(current_version, previous_version)
+          return
+        end
         download_configs if config_download_url
         install_release
         previous_version = get_release
@@ -33,6 +39,7 @@ module Dply
         Dir.chdir current_dir do
           tasks.deploy target
         end
+        release.record_deployment
         current_version = get_release
         tasks.report_changes(previous_version, current_version)
       end
