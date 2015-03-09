@@ -25,6 +25,7 @@ module Dply
       end
 
       def deploy
+        error "revision not specified( use -r)" if not revision 
         setup.archive
         if release.already_deployed? && release.current?
           logger.info "revision #{revision} is currently deployed"
