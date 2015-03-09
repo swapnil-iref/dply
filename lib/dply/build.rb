@@ -60,8 +60,8 @@ module Dply
     end
 
     def link_all
-      link "#{config.dir}/shared", dir_map
-      link "#{config.dir}/config", config_map
+      tasks.link "#{config.dir}/shared", dir_map
+      tasks.link "#{config.dir}/config", config_map
     end
 
     def install_pkgs
