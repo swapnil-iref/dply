@@ -8,7 +8,22 @@ module Dply
     include Helper
 
     attr_accessor :url, :verify_checksum
-    attr_reader :name
+    attr_writer :name
+
+    def self.find_or_create(revision, **kwargs)
+      release = new(revision, **kwargs)
+      name = find_installed_name(revision, **kwargs)
+      release.name = name if name
+      return release
+    end
+
+    def self.find_installed_name(revision, **kwargs)
+      branch = kwargs.fetch(:branch).to_s.gsub(/-/, "_")
+      app_name = kwargs.fetch(:app_name).to_s.gsub(/-/, "_")
+      name_without_ts = "#{revision}-#{app_name}-#{branch}-"
+      latest = Dir["releases/#{name_without_ts}*"].sort_by { |x, y| File.mtime(x) }.first
+      latest ? File.basename(latest) : nil
+    end
 
     def initialize(revision, app_name: nil, branch: nil, url: nil)
       @revision = revision
@@ -23,20 +38,33 @@ module Dply
       symlink path, "current"
     end
 
+    def name
+      @name ||= "#{@revision}-#{replace_dashes(@app_name)}-#{replace_dashes(@branch)}-#{timestamp}"
+    end
+
     def install
-      return if installed?
-      @name = name_without_ts + timestamp
+      if installed?
+        logger.debug "release #{name} already installed"
+        return
+      end
       Dir.mktmpdir "tmp" do |d|
         path = "#{d}/#{name}"
         archive.extract_to path
-        FileUtils.mv path, "releases"
+        FileUtils.mv path, "releases/"
       end
-      @installed = true
       archive.clean
     end
 
     def path
-      @path ||= "releases/#{@name}"
+      @path ||= "releases/#{name}"
+    end
+
+    def record_deployment
+      FileUtils.touch "#{path}/.deployed"
+    end
+
+    def already_deployed?
+      File.exist? "#{path}/.deployed"
     end
 
     private
@@ -53,23 +81,8 @@ module Dply
       Time.now.strftime "%Y%m%d%H%M%S"
     end
 
-    def load_status
-      name = name_without_ts
-      latest = Dir["releases/#{name}*"].sort_by { |x, y| File.mtime(x) }.first
-      if latest
-        @installed = true
-        @name = File.basename latest
-      end
-      @status_loaded = true
-    end
-
     def installed?
-      load_status if not @status_loaded
-      @installed
-    end
-
-    def name_without_ts
-      @name_without_ts ||= "#{@revision}-#{replace_dashes(@app_name)}-#{replace_dashes(@branch)}-"
+      File.exist? path
     end
 
   end

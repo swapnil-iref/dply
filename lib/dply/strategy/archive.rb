@@ -72,7 +72,7 @@ module Dply
       end
 
       def release
-        @release ||= Release.new(
+        @release ||= Release.find_or_create(
           revision, branch: branch,
           app_name: config.name,
           url: config.build_url
