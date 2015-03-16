@@ -25,6 +25,18 @@ module Dply
       latest ? File.basename(latest) : nil
     end
 
+    def self.parse(name)
+      arr = name.split("-")
+      deployed = File.exist? "releases/#{name}/.deployed"
+      release = {
+        revision: arr[0] || "NA",
+        project: arr[1] || "NA",
+        branch: arr[2] || "NA",
+        timestamp: arr[3] || "NA",
+        deployed: deployed
+      }
+    end
+
     def initialize(revision, app_name: nil, branch: nil, url: nil)
       @revision = revision
       @branch = branch
