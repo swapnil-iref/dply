@@ -72,8 +72,9 @@ module Dply
     def download(url, outfile)
       logger.bullet "downloading #{url} to #{outfile}"
       http_status = `curl -w "%{http_code}" -f -s -o '#{outfile}' '#{url}' `
-      if http_status != "200"
-        error "failed to download #{outfile}, http status #{http_status}"
+      exit_status = $?.existstatus
+      if (http_status != "200" || exit_status != 0)
+        error "failed to download #{outfile}, http status #{http_status}, exit_status #{exit_status}"
       end
     end
   

@@ -75,7 +75,7 @@ module Dply
       def download_configs
         files = config_map.values.uniq
         downloader = ConfigDownloader.new(files, config_download_url)
-        downloader.skip_download = config_skip_download 
+        downloader.skip_download = config_skip_download if config_skip_download 
         downloader.download_all
       end
 
