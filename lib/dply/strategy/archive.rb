@@ -4,6 +4,7 @@ require 'dply/setup'
 require 'dply/config_downloader'
 require 'dply/yum'
 require 'dply/release'
+require 'dply/release_helper'
 require 'forwardable'
 
 
@@ -30,6 +31,7 @@ module Dply
         if release.already_deployed? && release.current?
           logger.info "revision #{revision} is currently deployed"
           current_version = previous_version = get_release
+          prune_releases
           tasks.report_changes(current_version, previous_version)
           return
         end
@@ -42,6 +44,7 @@ module Dply
         end
         release.record_deployment
         current_version = get_release
+        prune_releases
         tasks.report_changes(previous_version, current_version)
       end
       
@@ -116,6 +119,10 @@ module Dply
 
       def tasks
         @tasks ||= Tasks.new(deployment: true)
+      end
+
+      def prune_releases
+        ReleaseHelper.new.prune_releases
       end
 
     end

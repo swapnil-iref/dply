@@ -1,5 +1,5 @@
 require 'dply/logger'
-require 'dply/release'
+require 'dply/release_helper'
 require 'dply/config'
 
 module Dply
@@ -29,12 +29,16 @@ module Dply
           else
             name = "NA"
           end
-          Release.parse name
+          release_helper.parse name
         end
       end
 
       def current_dir
         @current_dir ||= "current"
+      end
+
+      def release_helper
+        @release_helper ||= ReleaseHelper.new
       end
 
     end
