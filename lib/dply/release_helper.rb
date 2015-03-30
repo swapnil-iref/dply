@@ -12,7 +12,11 @@ module Dply
     end
 
     def prune_releases(keep: 5)
-      all_releases.reject! { |x| x == current_release_dir}[keep..-1].each do |d|
+      releases = all_releases
+      releases.reject! { |x| x == current_release_dir }
+      old_releases = releases[keep..-1]
+      return if not old_releases
+      old_releases.each do |d|
         logger.info "deleting old release #{File.basename d}"
         FileUtils.rm_rf d
       end
