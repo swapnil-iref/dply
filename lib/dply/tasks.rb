@@ -47,6 +47,7 @@ module Dply
     end
 
     def install_pkgs(build_mode: false, use_yum: false)
+      return if not File.exists? "pkgs.yml"
       drake_exists = File.exists? (drake_command)
       if use_yum || !drake_exists
         yum_install build_mode
