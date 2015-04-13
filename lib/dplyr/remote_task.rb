@@ -79,10 +79,11 @@ module Dplyr
       user = host_info[:user]
       host = host_info[:host]
       dir = host_info[:dir]
+      ssh = "ssh -tt -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
       if logger.debug?
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} '#{env} drake --remote --debug -d #{dir} #{task} 2>&1')
+        %(#{ssh} -l #{user} #{host} '#{env} drake --remote --debug -d #{dir} #{task} 2>&1')
       else
-        %(ssh -tt -oBatchMode=yes -l #{user} #{host} '#{env} drake --remote -d #{dir} #{task} 2>&1' 2>/dev/null)
+        %(#{ssh} -l #{user} #{host} '#{env} drake --remote -d #{dir} #{task} 2>&1' 2>/dev/null)
       end
     end
 
