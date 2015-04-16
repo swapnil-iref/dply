@@ -14,7 +14,7 @@ module Dply
       if Dir.exist? "#{dir}/.git"
         raise "unable to create repo" if not verify_remote_url
       else
-        Git.clone upstream, dir 
+        Git.clone upstream, dir, mirror: @mirror
       end
     end
 

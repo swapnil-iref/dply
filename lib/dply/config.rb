@@ -33,6 +33,10 @@ module Dply
       set :repo, repo
     end
 
+    def mirror(repo)
+      set :mirror, repo
+    end
+
     def branch(branch)
       set :branch, branch
     end

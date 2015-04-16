@@ -36,7 +36,7 @@ module Dply
     private
 
     def create_repo
-      repo = ::Dply::Repo.new("repo", @config.repo)
+      repo = ::Dply::Repo.new("repo", @config.repo, mirror: @config.mirror)
       repo.create
     end
 

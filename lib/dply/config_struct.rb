@@ -4,7 +4,7 @@ module Dply
 
     attr_writer :revision, :build_url, :build_url_proc, 
                 :revision_proc
-    attr_accessor :dir, :name, :repo, :branch, 
+    attr_accessor :dir, :name, :repo, :branch, :mirror,
                   :strategy, :target, :verify_checksum, 
                   :config_map, :dir_map, :shared_dirs, 
                   :config_download_url, :config_skip_download 

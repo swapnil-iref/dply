@@ -20,7 +20,12 @@ module Dply
     end
 
     def self.clone(repo, dir, mirror: nil)
-      cmd "git clone #{repo} #{dir}"
+      if mirror
+        cmd "git clone #{mirror} #{dir}"
+        Dir.chdir(dir) { cmd "git remote set-url origin #{repo}" }
+      else
+        cmd "git clone #{repo} #{dir}"
+      end
     end
 
     def self.clean
