@@ -1,5 +1,9 @@
+require 'dply/helper'
+
 module Dplyr
   class Stage
+
+    include ::Dply::Helper
 
     attr_accessor :config_proc
 
@@ -18,12 +22,13 @@ module Dplyr
       })
     end
 
-    def host(host, user: nil, dir: nil, id: nil)
+    def host(addr, user: nil, dir: nil, id: nil, roles: [])
       @hosts << ({
-        host: host,
+        addr: addr,
         user: user,
         dir: dir,
-        id: id || host
+        id: id || addr,
+        roles: cleaned_roles(roles)
       })
     end
 
@@ -54,13 +59,29 @@ module Dplyr
       return value
     end
 
+    def add_default_roles
+      return if not @hosts.size > 0
+      @hosts.first[:roles] << "first"
+      @hosts.last[:roles] << "last"
+    end
+
     def finalize
       return if @finalized
       instance_eval &config_proc if config_proc
       fill_hosts
+      add_default_roles
       @hosts.freeze
       @parallel_runs.freeze
       @finalized = true
+    end
+
+    def cleaned_roles(roles)
+      error "roles must be an array" if not roles.is_a? Array
+      roles.each do |r|
+        r.strip!
+        error "invalid role value #{r} " if not r =~ /\A[0-9A-Za-z_\-]+\z/
+      end
+      return roles
     end
 
   end

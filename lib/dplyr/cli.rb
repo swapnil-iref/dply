@@ -1,5 +1,5 @@
 require 'dplyr/stages_config'
-require 'dplyr/remote_task'
+require 'dplyr/task_runner'
 require 'dply/logger'
 
 module Dplyr
@@ -52,8 +52,8 @@ module Dplyr
     end
 
     def run_remote_task
-      remote_task = RemoteTask.new(hosts, argv_str, parallel_jobs: parallel_jobs, env: env_str)
-      remote_task.run
+      task_runner  = TaskRunner.new(hosts, argv_str, parallel_jobs: parallel_jobs)
+      task_runner.run
     end
 
   end

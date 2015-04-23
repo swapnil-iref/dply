@@ -6,85 +6,49 @@ module Dplyr
   class RemoteTask
 
     include ::Dply::Logger
-    
-    attr_reader :hosts, :parallel_jobs, :task, :env
 
-    def initialize(hosts, task, parallel_jobs: 1, env: "")
-      @hosts = hosts
-      @parallel_jobs = parallel_jobs
+    attr_reader :exit_status, :messages
+
+    def initialize(host, task, id_size: nil)
+      @host = host
       @task = task
-      @env = env
-      @env << " PATH=/usr/sbin:/usr/local/sbin:$PATH"
+      @messages = []
+      @id_size = id_size || @host_info[:id].size
     end
 
     def run
-      if parallel_jobs > 1 && hosts.count > 1
-        run_in_parallel
-      else
-        run_serially
-      end
+      reset!
+      r, w, pid = PTY.spawn(remote_cmd)
+      pty_read(r, @host[:id])
+      @exit_status = get_exit_status pid
     end
 
-    def run_in_parallel
-      init_run
-      parallel_jobs.times do
-        spawn_queued_job
-      end
-      loop do
-        break if @queue.empty?
-        @mq.pop
-        spawn_queued_job
-      end
-      report.print_full
-    end
-
-    def run_serially
-      hosts.each do |host_info|
-        puts "=== Running on #{host_info[:id]} ==="
-        run_cmd = remote_cmd host_info
-        system run_cmd
-        puts 
-        raise ::Dply::Error, "remote deploy failed on #{host_info[:id]}" if $? != 0
-      end
-    end
-
-    private
-
-    def init_run
-      queue_all_hosts
-      job_output_template
-      @threads = {}
-      @mq = Queue.new
-    end
-
-    def queue_all_hosts
-      @queue = Queue.new
-      hosts.each { |h| @queue << h }
-    end
-
-    def spawn_job(host_info)
-      run_cmd = remote_cmd host_info
-      thread = popen(run_cmd, host_info)
-      @threads[host_info] = thread
-    end
-
-    def spawn_queued_job
-      return if @queue.empty?
-      host = @queue.pop(false)
-      spawn_job host
-    rescue ThreadError
-    end
-
-    def remote_cmd(host_info)
-      user = host_info[:user]
-      host = host_info[:host]
-      dir = host_info[:dir]
-      ssh = "ssh -tt -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+    def remote_cmd
       if logger.debug?
-        %(#{ssh} -l #{user} #{host} '#{env} drake --remote --debug -d #{dir} #{task} 2>&1')
+        %(#{ssh} -l #{user} #{addr} '#{env} drake --remote --debug -d #{dir} #{@task} 2>&1')
       else
-        %(#{ssh} -l #{user} #{host} '#{env} drake --remote -d #{dir} #{task} 2>&1' 2>/dev/null)
+        %(#{ssh} -l #{user} #{addr} '#{env} drake --remote -d #{dir} #{@task} 2>&1' 2>/dev/null)
       end
+    end
+
+    def user
+      @host.fetch :user
+    end
+
+    def dir
+      @host.fetch :dir
+    end
+
+    def addr
+      @host.fetch :addr
+    end
+
+    def roles
+      @host.fetch :roles
+    end
+    
+    def ssh
+      "ssh -tt -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
     end
 
     def pty_read(file, id)
@@ -92,72 +56,42 @@ module Dplyr
         if line =~ /\Adply_msg\|/
           receive_message line
         else
-          printf @job_output_template, id, line
+          printf output_template, id, line
         end
       end
     rescue EOFError,Errno::ECONNRESET, Errno::EPIPE, Errno::EIO => e
     end
 
-    def popen(cmd, host_info)
-      t = Thread.new do |t|
-        Thread.current[:messages] = []
-        begin
-          r, w, pid = PTY.spawn(cmd)
-          pty_read(r, host_info[:id])
-          exit_status pid
-        ensure
-          @mq << true
-        end
-      end
-      t.abort_on_exception = true
-      t.run
-      return t
+    def receive_message(msg_str)
+      msg = msg_str.partition("|")[2].strip
+      return if msg.empty?
+      @messages << msg
     end
 
-    def host_id_max_width
-      hosts.map {|h| h[:id].size }.max
+    def get_exit_status(pid)
+      pid, status = Process.waitpid2(pid)
+      return status
     end
 
-    def job_output_template
-      @job_output_template ||= begin
-        id_template = "%-#{host_id_max_width}s".bold.grey
+    def output_template
+      @output_template ||= begin
+        id_template = "%-#{@id_size}s".bold.grey
         template = "#{id_template}  %s"
       end
     end
 
-    def receive_message(msg_str)
-      msg = msg_str.partition("|")[2].strip
-      return if msg.empty?
-      messages = Thread.current[:messages]
-      messages << msg
+    def reset!
+      @output_template = nil
     end
 
-    def report
-      @report ||= Report.new(hosts, exit_statuses, messages)
+    def env
+      @env ||= "PATH=/usr/sbin:/usr/local/sbin:$PATH #{roles_env}"
     end
 
-    def messages
-      @messages ||= begin
-        m = {}
-        @threads.each do |host, thread|
-          m[host] = thread[:messages]
-        end
-        m
-      end
-    end
-
-    def exit_statuses
-      return @exit_statuses if @exit_statuses
-      @exit_statuses = {}
-      @threads.each do |host, thread|
-        @exit_statuses[host] = thread.value
-      end
-      @exit_statuses
-    end
-
-    def exit_status(pid)
-      pid, status = Process.waitpid2(pid)
-      return status
+    def roles_env
+      return "" if not roles.size > 0
+      roles_str = roles.join(",")
+      "DPLY_ROLES=#{roles_str}"
     end
 
   end
