@@ -3,7 +3,7 @@ require 'dply/ext/string'
 module Dply
   class CustomLogger < ::Logger
 
-    attr_writer :trace_mode, :remote_mode
+    attr_writer :trace_mode, :remote_mode, :enable_markers
 
     def initialize(file)
       super(file)
@@ -35,6 +35,11 @@ module Dply
     def remote(msg)
       return if not @remote_mode
       puts %{dply_msg|#{msg}}
+    end
+
+    def marker(msg)
+      return if not @enable_markers
+      puts "dply_marker:#{msg}"
     end
 
   end

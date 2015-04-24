@@ -45,10 +45,14 @@ opts_parser = OptionParser.new do |opts|
       logger.level = ::Logger::DEBUG
     end
 
+    opts.on("-m", "--enable-markers", "Enable marker logging") do
+      logger.enable_markers = true
+    end
+
     opts.on_tail("-h", "--help", "Show this message") do 
       puts opts
       exit
-    end 
+    end
 end
 begin
   opts_parser.order!(ARGV)
@@ -70,4 +74,8 @@ rescue OptionParser::InvalidOption, OptionParser::MissingArgument, ::Dply::Error
     logger.error "#{e.message}"
     abort
   end
+ensure
+  logger.marker "end"
 end
+
+

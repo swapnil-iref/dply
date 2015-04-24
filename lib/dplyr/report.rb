@@ -1,6 +1,8 @@
+require 'dply/logger'
 module Dplyr
   class Report
 
+    include ::Dply::Logger
     attr_reader :hosts, :exit_statuses 
 
     def initialize(hosts, exit_statuses, messages)
@@ -11,6 +13,7 @@ module Dplyr
 
 
     def print_full
+      logger.marker "summary_start"
       print_successful_jobs
       print_failed_jobs
       print_summary
@@ -52,7 +55,7 @@ module Dplyr
       run_count = @exit_statuses.count
       not_run = total_hosts - run_count
       if (failed.count > 0 || not_run > 0 )
-        not_run_error = "not run on #{not_run}/#{total_hosts}" if not_run > 0
+        not_run_error = "not run on #{not_run} of #{total_hosts} hosts" if not_run > 0
         failed_error = "failed on #{failed.count} of #{total_hosts} hosts" if failed.count > 0
        
         errors = []
