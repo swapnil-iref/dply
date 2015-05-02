@@ -26,6 +26,10 @@ module Dply
       end
     end
 
+    def installed?
+      not_installed_pkgs.size == 0
+    end
+
     private
 
     def pkgs_str
@@ -40,10 +44,6 @@ module Dply
       return [] if pkgs_str.strip.empty?
       command = "rpm -V --noscripts --nodeps --nofiles #{pkgs_str}"
       matches = `#{command}`.scan(/^package (.*) is not installed$/)
-    end
-
-    def installed?
-      not_installed_pkgs.size == 0
     end
 
   end

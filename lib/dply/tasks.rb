@@ -4,6 +4,8 @@ require 'dply/bundle'
 require 'dply/yum'
 require 'dply/linker'
 require 'dply/pkgs_config'
+require 'dply/error'
+require 'etc'
 
 module Dply
   class Tasks
@@ -49,9 +51,12 @@ module Dply
     def install_pkgs(build_mode: false, use_yum: false)
       return if not File.exists? "pkgs.yml"
       drake_exists = File.exists? (drake_command)
+
+      pkgs = get_pkgs(build_mode)
       if use_yum || !drake_exists
-        yum_install build_mode
+        yum_install pkgs
       else
+        return if Yum.new(pkgs).installed?
         command_install build_mode
       end
     end
@@ -70,19 +75,38 @@ module Dply
       @bundle ||= Bundle.new(deployment: @deployment)
     end
 
-    def yum_install(build_mode)
-      pkgs = PkgsConfig.new(build_mode: build_mode).pkgs
+    def get_pkgs(build_mode)
+      PkgsConfig.new(build_mode: build_mode).pkgs
+    end
+
+    def yum_install(pkgs)
       Yum.new(pkgs, sudo: true).install
     end
 
     def command_install(build_mode)
-      command = "sudo -n #{drake_command} install-pkgs"
+      command = "#{drake_command} install-pkgs"
       command << " -b" if build_mode
-      cmd command
+      check_sudo_permission command
+      cmd "sudo -n #{command}"
     end
 
     def drake_command
       @drake_command ||= (ENV["DRAKE_COMMAND"] || "/opt/ruby/bin/drake")
+    end
+
+    def check_sudo_permission(command)
+      output = `sudo -n -l #{command}`
+      if output.chomp.strip == command
+        return true
+      else
+        msg = []
+        user = Etc.getpwuid(Process.uid).name
+        msg << %{unable to run "#{command}" with sudo permissions}
+        msg << %{To resolve add the following line to sudoers: }
+        msg << %{#{user} ALL=(ALL) NOPASSWD: /opt/ruby/bin/drake install-pkgs *, /opt/ruby/bin/drake install-pkgs}.yellow 
+        raise Error, msg.join("\n")
+      end
+
     end
 
   end
