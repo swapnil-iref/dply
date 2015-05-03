@@ -71,7 +71,9 @@ begin
 
   command = (ARGV.shift || "").to_sym
   case command
-  when :deploy, :reload, :task, :build, :depcheck, :"install-pkgs", :reopen_logs, :status
+  when :deploy, :reload, :task,
+       :build, :depcheck, :"install-pkgs", :reopen_logs,
+       :status, :devbuild
     run_cli command, ARGV
   when /\A[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+\z/
     require 'dply/tasks'
