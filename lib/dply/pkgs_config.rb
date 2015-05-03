@@ -29,7 +29,7 @@ module Dply
         logger.debug "skipping yum pkgs"
         return {}
       end
-      YAML.safe_load(File.read(@pkgs_yml))
+      YAML.safe_load(File.read(@pkgs_yml)) || {}
     rescue => e
       error "error loading pkgs list" 
     end

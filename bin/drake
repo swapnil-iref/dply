@@ -73,7 +73,7 @@ begin
   case command
   when :deploy, :reload, :task,
        :build, :depcheck, :"install-pkgs", :reopen_logs,
-       :status, :devbuild
+       :status, :devbuild, :setup
     run_cli command, ARGV
   when /\A[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+\z/
     require 'dply/tasks'
