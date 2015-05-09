@@ -34,7 +34,7 @@ module Dply
     def install_global
       exitstatus = system "bundle check > /dev/null"
       return if exitstatus
-      cmd "bundle install"
+      cmd "bundle install -j5"
     end
 
     def install_deployment
@@ -42,7 +42,7 @@ module Dply
         exitstatus = system "bundle check > /dev/null"
         return if exitstatus
       end
-      cmd "bundle install --deployment"
+      cmd "bundle install -j5 --deployment"
     end
 
     def deployment_config_present?
