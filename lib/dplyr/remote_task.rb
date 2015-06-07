@@ -91,7 +91,7 @@ module Dplyr
     def roles_env
       return "" if not roles.size > 0
       roles_str = roles.join(",")
-      "DPLY_ROLES=#{roles_str}"
+      "DPLY_ROLES=#{roles_str} DPLY_PERSIST_ROLES=1"
     end
 
   end
