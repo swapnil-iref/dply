@@ -81,7 +81,7 @@ module Dply
       end
 
       def install_pkgs
-        tasks.install_pkgs(use_yum: options[:use_yum])
+        tasks.install_pkgs(use_yum: options[:use_yum], build_mode: true)
       end
 
       def setup
