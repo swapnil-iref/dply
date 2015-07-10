@@ -18,7 +18,7 @@ module Dply
     end
 
     def self.find_installed_name(revision, **kwargs)
-      branch = kwargs.fetch(:branch).to_s.gsub(/-/, "_")
+      branch = kwargs.fetch(:branch).to_s.gsub(/-/, "_").sub("/", "_")
       app_name = kwargs.fetch(:app_name).to_s.gsub(/-/, "_")
       name_without_ts = "#{revision}-#{app_name}-#{branch}-"
       latest = Dir["releases/#{name_without_ts}*"].sort_by { |x, y| File.mtime(x) }.first
@@ -27,7 +27,7 @@ module Dply
 
     def initialize(revision, app_name: nil, branch: nil, url: nil)
       @revision = revision
-      @branch = branch
+      @branch = branch.sub("/", "_")
       @app_name = app_name
       @url = url
     end
