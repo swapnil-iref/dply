@@ -27,7 +27,7 @@ module Dply
 
     def initialize(revision, app_name: nil, branch: nil, url: nil)
       @revision = revision
-      @branch = branch.sub("/", "_")
+      @branch = branch.to_s.sub("/", "_")
       @app_name = app_name
       @url = url
     end
