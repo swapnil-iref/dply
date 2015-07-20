@@ -1,82 +1,67 @@
 require 'dply/helper'
+require 'dply/curl'
 require 'uri'
+require 'tmpdir'
+
 module Dply
   class Archive
 
     include Helper
 
+    attr_reader :name, :path, :checksum_path, :uri
+
     def initialize(url, verify_checksum: true)
-      @url = url
+      @uri = URI.parse url
       @verify_checksum = verify_checksum
+      @name = File.basename(uri.path)
+      @path = "tmp/archive/#{name}"
+      @checksum_path = "tmp/archive/#{name}.md5"
     end
 
-    def extract_to(extraction_path)
-      download_file if not @downloaded
-      FileUtils.rm_rf extraction_path if File.exists? extraction_path
-      FileUtils.mkdir_p extraction_path
-      cmd "tar xf #{path} -C #{extraction_path}", display: true
+    def extract(&block)
+      download_file
+      Dir.mktmpdir "tmp", "./" do |d|
+        extracted = "#{d}/extracted"
+        FileUtils.mkdir extracted
+        cmd "tar xf #{path} -C #{extracted}", display: true
+        yield extracted
+      end
+      cleanup
     end
 
-    def clean
-      logger.trace "cleaning cache"
-      files = [ "tmp/cache/#{name}", "tmp/cache/#{name}.md5" ]
-      files.each { |f| FileUtils.rm f if File.exists? f }
-    end
     private
 
+    def cleanup
+      logger.trace "cleaning tmp/archive"
+      files = [ path, checksum_path ]
+      files.each { |f| FileUtils.rm f if File.exists? f }
+    end
+
     def download_file
-      if File.exists? path
-        download(uri, path) if not verify_checksum
-      else
-        download(uri, path)
+      curl.download(uri, path)
+      if @verify_checksum
+        download_checksum
+        error "checksum doesn't match for archive" if not checksum_matches?
       end
-      raise if not verify_checksum
-      @downloaded = true
-    end
-    
-    def uri
-      @uri ||= URI.parse(@url)
     end
 
-    def name
-      @name ||= File.basename(uri.path)
-    end
-
-    def path
-      @path = "tmp/cache/#{name}"
+    def download_checksum
+      curl.download("#{uri}.md5", checksum_path)
     end
 
     def checksum
-      @checksum ||= load_checksum
+      File.read(checksum_path).chomp
     end
 
-    def load_checksum
-      file = "tmp/cache/#{name}.md5"
-      if File.exists? file
-        checksum = File.read(file).chomp
-        return checksum if checksum.size == 32
-      end
-      download("#{uri}.md5", file)
-      checksum = File.read(file).chomp
-      raise if checksum.size != 32
-      return checksum
-    end
-
-    def verify_checksum
-      return true if not @verify_checksum
+    def checksum_matches?
       require 'digest'
       computed_checksum = Digest::MD5.file path
       computed_checksum == checksum
     end
 
-    def download(url, outfile)
-      logger.bullet "downloading #{url} to #{outfile}"
-      http_status = `curl -w "%{http_code}" -f -s -o '#{outfile}' '#{url}' `
-      exit_status = $?.exitstatus
-      if (http_status != "200" || exit_status != 0)
-        error "failed to download #{outfile}, http status #{http_status}, exit_status #{exit_status}"
-      end
+    def curl
+      @curl ||= Curl.new
     end
-  
+
   end
 end

@@ -47,12 +47,9 @@ module Dply
         logger.debug "release #{name} already installed"
         return
       end
-      Dir.mktmpdir "tmp" do |d|
-        path = "#{d}/#{name}"
-        archive.extract_to path
-        FileUtils.mv path, "releases/"
+      archive.extract do |path|
+        FileUtils.mv path, "releases/#{name}"
       end
-      archive.clean
     end
 
     def path
