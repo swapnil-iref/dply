@@ -11,7 +11,13 @@ class Minitest::Test
 
 end
 
+
 Minitest::Reporters.use! Minitest::Reporters::SpecReporter.new
 
 require 'fileutils'
 FileUtils.mkdir_p "tmp/archive"
+
+if not ENV['DEBUG']
+  require 'dply/logger'
+  Dply::Logger.logger.silence!
+end

@@ -3,6 +3,10 @@ require 'dply/custom_logger'
 module Dply
   module Logger
 
+    class << self
+      attr_writer :logger
+    end
+
     def self.logger
       @logger ||= ::Dply::CustomLogger.new(STDOUT)
     end

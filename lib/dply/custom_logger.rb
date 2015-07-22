@@ -24,22 +24,26 @@ module Dply
     end
 
     def bullet(msg)
-      puts "#{"\u2219".bold.blue} #{msg}"
+      info "#{"\u2219".bold.blue} #{msg}"
     end
 
     def trace(msg)
       return if not @trace_mode
-      puts %(#{"T".bold.blue} #{msg}\n)
+      info %(#{"T".bold.blue} #{msg}\n)
     end
 
     def remote(msg)
       return if not @remote_mode
-      puts %{dply_msg|#{msg}}
+      info %{dply_msg|#{msg}}
     end
 
     def marker(msg)
       return if not @enable_markers
-      puts "dply_marker:#{msg}"
+      info "dply_marker:#{msg}"
+    end
+
+    def silence!
+      @logdev = nil
     end
 
   end

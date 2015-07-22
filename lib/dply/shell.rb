@@ -9,7 +9,7 @@ module Dply
     def cmd(command, display: true, error_msg: nil, return_output: false, env:{})
       stringify_values(env)
       if display
-        puts "#{"\u2219".bold.blue} #{command}"
+        logger.bullet command
       else
         logger.debug command
       end
