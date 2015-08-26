@@ -1,20 +1,15 @@
-require 'dply/shell'
+require 'dply/helper'
 module Dply
   class Bundle
 
-    include Shell
+    include Helper
 
-    def initialize(deployment: true)
-      @deployment = deployment
+    def install_deployment
+      install(without: ["test", "development"])
     end
 
-    def install
-      return if not gemfile_exists?
-      if @deployment
-        install_deployment
-      else
-        install_global
-      end
+    def install_test
+      install(without: ["development"])
     end
 
     def rake(task, **args)
@@ -26,42 +21,38 @@ module Dply
     end
 
     def clean
+      bundle_without(without: ["development"])
       cmd "bundle clean"
     end
 
     private
 
-    def install_global
-      exitstatus = system "bundle check > /dev/null"
-      return if exitstatus
-      cmd "bundle install -j5"
+    def check
+      system "bundle check > /dev/null"
     end
 
-    def install_deployment
-      if deployment_config_present?
-        exitstatus = system "bundle check > /dev/null"
-        return if exitstatus
-      end
+    def install(without:[])
+      #persists BUNDLE_WITHOUT config
+      bundle_without(without)
+      return if check
       cmd "bundle install -j5 --deployment"
     end
 
-    def deployment_config_present?
-      file = ".bundle/config"
-      if not File.readable? file
-        return false
-      end
-      config = YAML.load_file file
-      config["BUNDLE_FROZEN"] == "1" && config["BUNDLE_PATH"] == "vendor/bundle"
-    rescue
-      return false
+    def bundle_without(without: [])
+      value = without.join(":")
+      cmd "bundle config without #{value}", display: false
     end
 
     def env
-      @env ||= env_from_yml
+      @env ||= begin
+        env = {}
+        env.merge! env_from_yml(".env.yml")
+        env.merge! env_from_yml("config/env.yml")
+        env
+      end
     end
 
-    def env_from_yml
-      path = "config/env.yml"
+    def env_from_yml(path)
       if not File.readable? path
         logger.debug "skipped loading env from #{path}"
         return {}
