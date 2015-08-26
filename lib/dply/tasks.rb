@@ -1,38 +1,32 @@
 require 'json'
-require 'dply/shell'
+require 'dply/helper'
 require 'dply/bundle'
-require 'dply/yum'
 require 'dply/linker'
-require 'dply/pkgs_config'
-require 'dply/error'
+require 'dply/pkgs'
 require 'etc'
 
 module Dply
   class Tasks
 
-    include Shell
-
-    def initialize(deployment: true)
-      @deployment = deployment
-    end
+    include Helper
 
     def deploy(target)
-      bundle.install
+      bundle.install_deployment
       rake "#{target}:deploy"
     end
 
     def reload(target)
-      bundle.install
+      bundle.install_deployment
       rake "#{target}:reload"
     end
 
     def task(task)
-      bundle.install
+      bundle.install_deployment
       rake task
     end
 
     def build(task)
-      bundle.install
+      bundle.install_deployment
       bundle.clean
       rake task
     end
@@ -50,13 +44,12 @@ module Dply
 
     def install_pkgs(build_mode: false, use_yum: false)
       return if not File.exists? "pkgs.yml"
+      return if pkgs.installed?(build_mode: build_mode)
       drake_exists = File.exists? (drake_command)
 
-      pkgs = get_pkgs(build_mode)
       if use_yum || !drake_exists
-        yum_install pkgs
+        pkgs.install(build_mode: build_mode, sudo: true)
       else
-        return if Yum.new(pkgs).installed?
         command_install build_mode
       end
     end
@@ -72,15 +65,11 @@ module Dply
     private
 
     def bundle
-      @bundle ||= Bundle.new(deployment: @deployment)
+      @bundle ||= Bundle.new
     end
 
-    def get_pkgs(build_mode)
-      PkgsConfig.new(build_mode: build_mode).pkgs
-    end
-
-    def yum_install(pkgs)
-      Yum.new(pkgs, sudo: true).install
+    def pkgs
+      @pkgs ||= Pkgs.new
     end
 
     def command_install(build_mode)
