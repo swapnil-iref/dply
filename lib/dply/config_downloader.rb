@@ -1,5 +1,7 @@
 require 'dply/helper'
 require 'fileutils'
+require 'dply/curl'
+
 module Dply
   class ConfigDownloader
 
@@ -19,32 +21,14 @@ module Dply
           logger.debug "skipping to download file #{f}"
           next
         end
-        download f
-        FileUtils.mv "#{tmpdir}/#{f}", "config/#{f}"
+        curl.download f, "config/#{f}"
       end
     end
 
     private
 
-    def download(file)
-      url = "#{@base_url}/#{file}"
-      logger.bullet "downloading #{file}"
-      http_status = `curl -w "%{http_code}" -f -s -o '#{tmpdir}/#{file}' '#{url}' `
-      exitstatus = $?.exitstatus
-      if (http_status != "200"  || exitstatus != 0 )
-        error "failed to download #{file}, http status #{http_status}, exitstatus #{exitstatus}"
-      end
-    end
-
-    def tmpdir
-      @tmpdir ||= "tmp/config_dl"
-    end
-
-    def init_tmpdir
-      if File.exists? tmpdir
-        FileUtils.rm_rf tmpdir
-      end
-      FileUtils.mkdir_p tmpdir
+    def curl
+      @curl ||= Curl.new
     end
 
   end
