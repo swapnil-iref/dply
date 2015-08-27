@@ -6,7 +6,7 @@ require 'tmpdir'
 module Dply
   module Helper
 
-    def cmd(command, display: true, error_msg: nil, return_output: false, env:{})
+    def cmd(command, display: true, error_msg: nil, return_output: false, env:{}, shell: false)
       stringify_values!(env)
       if display
         logger.bullet command
@@ -14,11 +14,12 @@ module Dply
         logger.debug command
       end
       command_arr = command.split
+      run_command = shell ? command : command_arr
 
       output = if return_output
-        IO.popen(env, command_arr) { |f| f.read }
+        IO.popen(env, run_command) { |f| f.read }
       else
-        system(env, *command_arr, 2 => 1)
+        system(env, *run_command, 2 => 1)
       end
       return_value = $?.exitstatus
       error_msg ||= "non zero exit for \"#{command}\""
