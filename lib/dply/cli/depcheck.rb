@@ -15,10 +15,8 @@ module Dply
       def run
         tar_path = @argv.shift
         error "tar path not specified" if not tar_path
-        tar_path = "#{Dir.pwd}/#{tar_path}"
-        pkgs = PkgsConfig.new.pkgs
         deplist = Deplist.new(tar_path)
-        deplist.verify! pkgs
+        deplist.verify!
       end
 
     end
