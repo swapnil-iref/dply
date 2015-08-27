@@ -1,5 +1,4 @@
-require 'dply/pkgs_config'
-require 'dply/yum'
+require 'dply/pkgs'
 require 'dply/helper'
 
 module Dply
@@ -16,8 +15,9 @@ module Dply
       def run
         opts.parse!(@argv)
         error "pkgs.yml cannot be a symlink" if File.symlink? "pkgs.yml"
-        pkgs = PkgsConfig.new(build_mode: @options[:build_mode]).pkgs
-        Yum.new(pkgs).install
+        pkgs = Pkgs.new
+        pkgs.install(build_mode: @options[:build_mode])
+        puts "installed"
       end
 
       def opts
