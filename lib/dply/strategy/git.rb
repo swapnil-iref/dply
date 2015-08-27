@@ -89,7 +89,7 @@ module Dply
       end
 
       def tasks
-        @tasks ||= Tasks.new(deployment: true)
+        @tasks ||= Tasks.new
       end
 
     end
