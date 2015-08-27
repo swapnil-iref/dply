@@ -10,25 +10,27 @@ module Dply
     attr_accessor :url, :verify_checksum
     attr_writer :name
 
-    def self.find_or_create(revision, **kwargs)
-      release = new(revision, **kwargs)
-      name = find_installed_name(revision, **kwargs)
+    def self.find_or_create(**kwargs)
+      release = new(**kwargs)
+      name = find_installed_name(**kwargs)
       release.name = name if name
       return release
     end
 
-    def self.find_installed_name(revision, **kwargs)
-      branch = kwargs.fetch(:branch).to_s.gsub(/-/, "_").sub("/", "_")
-      app_name = kwargs.fetch(:app_name).to_s.gsub(/-/, "_")
+    def self.find_installed_name(**kwargs)
+      branch = kwargs.fetch(:branch).to_s.tr('-/', '__')
+      app_name = kwargs.fetch(:app_name).to_s.tr('-/', '__')
+      revision = kwargs.fetch(:revision)
+
       name_without_ts = "#{revision}-#{app_name}-#{branch}-"
       latest = Dir["releases/#{name_without_ts}*"].sort_by { |x, y| File.mtime(x) }.first
       latest ? File.basename(latest) : nil
     end
 
-    def initialize(revision, app_name: nil, branch: nil, url: nil)
+    def initialize(revision:, app_name:, branch:, url:)
       @revision = revision
-      @branch = branch.to_s.sub("/", "_")
-      @app_name = app_name
+      @branch = branch.to_s.tr('-/', '__')
+      @app_name = app_name.to_s.tr('-/', '__')
       @url = url
     end
 
@@ -39,7 +41,7 @@ module Dply
     end
 
     def name
-      @name ||= "#{@revision}-#{replace_dashes(@app_name)}-#{replace_dashes(@branch)}-#{timestamp}"
+      @name ||= "#{@revision}-#{@app_name}-#{@branch}-#{timestamp}"
     end
 
     def install
@@ -70,10 +72,6 @@ module Dply
     end
 
     private
-
-    def replace_dashes(str)
-      str.to_s.gsub(/-/, "_")
-    end
 
     def archive
       @archive ||= Archive.new(url, verify_checksum: @verify_checksum)

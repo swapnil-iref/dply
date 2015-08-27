@@ -84,7 +84,8 @@ module Dply
 
       def release
         @release ||= Release.find_or_create(
-          revision, branch: branch,
+          revision: revision,
+          branch: branch,
           app_name: config.name,
           url: config.build_url
         )
@@ -118,7 +119,7 @@ module Dply
       end
 
       def tasks
-        @tasks ||= Tasks.new(deployment: true)
+        @tasks ||= Tasks.new
       end
 
       def prune_releases
