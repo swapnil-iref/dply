@@ -33,14 +33,14 @@ module Dply
 
     def install(without:[])
       #persists BUNDLE_WITHOUT config
-      bundle_without(without)
+      bundle_without(without: without)
       return if check
       cmd "bundle install -j5 --deployment"
     end
 
     def bundle_without(without: [])
       value = without.join(":")
-      cmd "bundle config without #{value}", display: false
+      cmd "bundle config --local without #{value}", return_output: true
     end
 
     def env
