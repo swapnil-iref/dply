@@ -1,6 +1,6 @@
 require 'yaml'
 require 'dply/helper'
-require 'yum'
+require_relative 'yum'
 
 module Dply
   class Pkgs
@@ -29,9 +29,11 @@ module Dply
     def read_config
       @read ||= begin
         config = load_yml
-        @runtime = config[:pkgs].select { |i| validate! i}
-        @build = config[:build_pkgs].select { |i| validate! i }
+        @runtime = config["pkgs"] || []
+        @build = config["build_pkgs"] || []
         @all = @runtime + @build
+        @all.each { |i| validate! i }
+        true
       end
     end
 
