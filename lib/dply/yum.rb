@@ -6,11 +6,7 @@ module Dply
     include Helper
 
     def initialize(pkgs, sudo: false)
-      if pkgs.is_a? Set
-        @pkgs = pkgs.to_a
-      else
-        @pkgs = pkgs
-      end
+      @pkgs = pkgs
       @sudo = sudo
     end
 
