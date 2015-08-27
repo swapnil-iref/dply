@@ -2,6 +2,7 @@ require 'filemagic'
 require 'elf'
 require 'dply/helper'
 require 'dply/rpm'
+require 'dply/pkgs'
 require 'tmpdir'
 
 module Dply
@@ -10,25 +11,40 @@ module Dply
     include Helper
 
     def initialize(path)
-      @path = path
+      if Pathname.new(path).relative?
+        @path = "#{Dir.pwd}/#{path}"
+      else
+        @path = path
+      end
     end
 
-    def deps
-      @deps ||= load_deps
+    def verify!
+      error "#{@path} not readable" if not File.readable? @path
+      tmp_dir do
+        logger.info "(in #{Dir.pwd})"
+        cmd "tar xf #{@path}"
+        pkgs_list = Pkgs.new.runtime
+
+        @libs_files_map = libs_files_map
+        libs = @libs_files_map.keys
+
+        deps = rpm.libs_packages_map libs
+        verify_deps(deps, pkgs_list)
+      end
     end
 
-    def verify!(pkgs_list)
-      deps.each do |pkgs|
+    private
+
+    def verify_deps(deps, pkgs_list)
+      deps.each do |lib, pkgs|
         if not pkgs.any? { |pkg| pkgs_list.include? pkg }
-          logger.error "missing from pkgs.yml : any of #{pkgs}"
+          logger.error "missing from pkgs.yml : any of #{pkgs} (lib: #{lib}, files: #{@libs_files_map[lib]})"
           @error = true
         end
       end
       error "packages dependencies not satisfied" if @error
       puts "all dependencies satisfied".green
     end
-
-    private
 
     def magic
       @magic ||= begin
@@ -41,17 +57,6 @@ module Dply
       end
     end
 
-    def load_deps
-      error "#{@path} not readable" if not File.readable? @path
-      tmp_dir do
-        logger.info "(in #{Dir.pwd})"
-        cmd "tar xf #{@path}"
-        @libs = get_libs
-        logger.debug @libs.inspect
-        @deps = rpm.libs_to_packages @libs
-      end
-    end
-
     def tmp_dir(&block)
       dir = File.exist?("tmp") ? "tmp" : "/tmp"
       Dir.mktmpdir(nil, dir) do |d|
@@ -59,12 +64,14 @@ module Dply
       end
     end
 
-    def get_libs
-      libs = Set.new
+    def libs_files_map
+      libs = {}
       Dir["./**/*"].each do |f|
         type = magic.file(f)
-        if type =~ /ELF/
-          dynamic_libs(f).each { |k| libs << k }
+        next if not type =~ /ELF/
+        dynamic_libs(f).each do |l|
+          libs[l] ||= []
+          libs[l] << f
         end
       end
       return libs
