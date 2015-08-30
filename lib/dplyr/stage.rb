@@ -1,4 +1,5 @@
 require 'dply/helper'
+require_relative 'consul'
 
 module Dplyr
   class Stage
@@ -11,6 +12,8 @@ module Dplyr
       @name = name.to_sym
       @hosts = []
       @parallel_runs = 1
+      @dir = nil
+      @user = nil
     end
 
     def data
@@ -44,18 +47,31 @@ module Dplyr
       @parallel_runs = parallel_runs
     end
 
-    def fill_hosts
-      @hosts.each do |host|
-        host[:user] ||= fetch(:user)
-        host[:dir] ||= fetch(:dir)
+    def consul(app_name, service: "app")
+      consul = Consul.new
+      consul.hosts(app_name, service: service).each do |i|
+        host(i[:addr], user: i[:user], dir: i[:dir], id: i[:id])
       end
     end
 
     alias_method :deploy_dir, :dir
 
+    private
+
+    def fill_hosts
+      @hosts.each do |host|
+        begin
+          host[:user] ||= fetch(:user)
+          host[:dir] ||= fetch(:dir)
+        rescue
+          error "user/dir not specified for #{host[:id]}"
+        end
+      end
+    end
+
     def fetch(var)
       value = instance_variable_get("@#{var}")
-      raise "error accessing var #{var} for stage #{name}" if not value
+      error "error accessing var #{var} for stage #{name}" if not value
       return value
     end
 

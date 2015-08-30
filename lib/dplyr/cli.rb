@@ -23,7 +23,14 @@ module Dplyr
       when 'local'
         system "drake #{global_switches.join(" ")} #{argv_str}"
       else
-        run_remote_task
+        command = argv[0]
+        case command
+        when "list"
+          require 'pp'
+          pp hosts
+        else
+          run_remote_task
+        end
       end
     end
 
