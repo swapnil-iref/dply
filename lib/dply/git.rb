@@ -1,8 +1,8 @@
-require 'dply/shell'
+require 'dply/helper'
 module Dply
   module Git
 
-    extend Shell
+    extend Helper
 
     def self.pull(branch)
       cmd "git fetch"
