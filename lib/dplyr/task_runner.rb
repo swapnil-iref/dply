@@ -38,9 +38,9 @@ module Dplyr
 
     def run_in_parallel
       if @auto_serialize
-        execute_serially hosts[0]
-        execute_in_parallel Range.new(1,hosts.size - 2)
-        execute_serially hosts[-1]
+        t = execute_serially hosts[0]
+        return if t.exit_status != 0
+        execute_in_parallel Range.new(1,hosts.size - 1)
       else
         execute_in_parallel Range.new(0, hosts.size - 1)
       end

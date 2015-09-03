@@ -29,17 +29,17 @@ module Dply
       @build_url ||= instance_eval(&build_url_proc)
     end
 
-    def revision_proc
-      @revision_proc ||= Proc.new do
-        jenkins = Jenkins.new(repo, name)
-        jenkins.latest_successful_revision
+    def build_url_proc
+      @build_url_proc ||= Proc.new do
+        "#{repo}/artifacts/#{name}/#{revision}/#{name}-#{revision}-#{branch.to_s.tr("/","_")}.tar.gz"
       end
     end
 
-    def build_url_proc
-      @build_url_proc ||= Proc.new do
-        "#{repo.chomp("/")}/job/#{name}/#{revision}/artifact/build/#{name}-#{revision}-#{branch}.tar.gz"
-      end
+    def dir_map
+      @dir_map ||= {
+        "tmp" => "tmp",
+        "log" => "log"
+      }
     end
 
   end
