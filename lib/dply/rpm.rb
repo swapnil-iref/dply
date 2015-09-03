@@ -23,7 +23,7 @@ module Dply
     def whatprovides(lib)
       lib = "#{lib}()(64bit)"
       command = %(rpm --queryformat "%{NAME} " -q --whatprovides "#{lib}")
-      output = cmd command, return_output: true, shell: true
+      output = cmd command, return_output: true, shell: true, display: false
       list = output.strip.split.select {|pkg| not filtered? pkg }
     end
 
