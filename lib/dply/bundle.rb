@@ -1,10 +1,14 @@
 require 'dply/helper'
+require 'fileutils'
+require 'yaml'
+
 module Dply
   class Bundle
 
     include Helper
 
     def install
+      init
       return if check
       cmd "bundle install -j5 --deployment"
     end
@@ -22,6 +26,19 @@ module Dply
     end
 
     private
+
+    def init
+      @init ||= begin
+        h = {
+          "BUNDLE_PATH" => "vendor/bundle",
+          "BUNDLE_FROZEN" => "1",
+          "BUNDLE_DISABLE_SHARED_GEMS" => "1"
+        }
+        FileUtils.mkdir_p ".bundle"
+        File.open(".bundle/config", "w") { |f| f.write(YAML.dump h) }
+      end
+    end
+
 
     def check
       system "bundle check > /dev/null"
