@@ -29,6 +29,7 @@ module Dply
     def read_config
       @read ||= begin
         config = load_yml
+        error "data from pkgs.yml not a hash" if not config.is_a? Hash
         @runtime = config["pkgs"] || []
         @build = config["build_pkgs"] || []
         @all = @runtime + @build
