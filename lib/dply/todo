@@ -1,0 +1,8 @@
+archive.rb:
+  - git metadata(make a git repo out of code before making a tar)
+  -   
+
+refactor
+  - deplist
+  - config_struct(remove jenkins, dir_map)
+  - pkgs_config(all_pkgs, build_pkgs, pkgs)

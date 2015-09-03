@@ -1,4 +1,3 @@
-require 'dply/pkgs_config'
 require 'dply/deplist'
 require 'dply/helper'
 

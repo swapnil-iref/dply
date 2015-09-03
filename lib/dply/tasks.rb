@@ -11,22 +11,22 @@ module Dply
     include Helper
 
     def deploy(target)
-      bundle.install_deployment
+      bundle.install
       rake "#{target}:deploy"
     end
 
     def reload(target)
-      bundle.install_deployment
+      bundle.install
       rake "#{target}:reload"
     end
 
     def task(task)
-      bundle.install_deployment
+      bundle.install
       rake task
     end
 
     def build(task)
-      bundle.install_deployment
+      bundle.install
       bundle.clean
       rake task
     end

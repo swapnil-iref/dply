@@ -4,12 +4,9 @@ module Dply
 
     include Helper
 
-    def install_deployment
-      install(without: ["test", "development"])
-    end
-
-    def install_test
-      install(without: ["development"])
+    def install
+      return if check
+      cmd "bundle install -j5 --deployment"
     end
 
     def rake(task, **args)
@@ -21,7 +18,6 @@ module Dply
     end
 
     def clean
-      bundle_without(without: ["development"])
       cmd "bundle clean"
     end
 
@@ -29,18 +25,6 @@ module Dply
 
     def check
       system "bundle check > /dev/null"
-    end
-
-    def install(without:[])
-      #persists BUNDLE_WITHOUT config
-      bundle_without(without: without)
-      return if check
-      cmd "bundle install -j5 --deployment"
-    end
-
-    def bundle_without(without: [])
-      value = without.join(":")
-      cmd "bundle config --local without #{value}", return_output: true
     end
 
     def env
