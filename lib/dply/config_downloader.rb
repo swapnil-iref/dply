@@ -15,13 +15,12 @@ module Dply
     end
 
     def download_all
-      init_tmpdir
       @config_files.each do |f|
         if @skip_download.include? f
           logger.debug "skipping to download file #{f}"
           next
         end
-        curl.download f, "config/#{f}"
+        curl.download "#{@base_url}/#{f}", "config/#{f}"
       end
     end
 
