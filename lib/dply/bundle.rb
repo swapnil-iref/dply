@@ -1,6 +1,7 @@
 require 'dply/helper'
 require 'fileutils'
 require 'yaml'
+require 'shellwords'
 
 module Dply
   class Bundle
@@ -13,12 +14,11 @@ module Dply
       cmd "bundle install -j5 --deployment"
     end
 
-    def rake(task, **args)
-      if gemfile_exists?
-        cmd "bundle exec rake -Nf dply/Rakefile -R dply #{task}", env: env
-      else
-        cmd "rake -Nf dply/Rakefile -R dply #{task}", env: env
-      end
+    def rake(task)
+      rakelib = Shellwords.shellescape "#{__dir__}/rakelib"
+      rake_cmd = %(rake -R #{rakelib} -Nf dply/Rakefile #{task})
+      command = gemfile_exists? ? "bundle exec #{rake_cmd}" : rake_cmd
+      cmd command, env: env, display: false
     end
 
     def clean
@@ -38,7 +38,6 @@ module Dply
         File.open(".bundle/config", "w") { |f| f.write(YAML.dump h) }
       end
     end
-
 
     def check
       system "bundle check > /dev/null"
