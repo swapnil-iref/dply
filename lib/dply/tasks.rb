@@ -10,29 +10,37 @@ module Dply
 
     include Helper
 
-    def deploy(target)
+    def test(target, optional: false)
       bundle.install
-      rake "#{target}:deploy"
+      rake_runner "app:test:#{target}", optional: optional
     end
 
-    def reload(target)
+    def build(target)
+      task = target ? "app:build:#{target}" : "app:build:archive"
       bundle.install
-      rake "#{target}:reload"
+      bundle.clean
+      rake_runner task
+    end
+
+    def deploy(strategy, target: nil)
+      task = target ? "app:deploy:#{target}" : "app:deploy:#{strategy}"
+      bundle.install
+      rake_runner task
+    end
+
+    def reload
+      bundle.install
+      rake_runner "app:reload"
+    end
+
+    def stop
+      bundle.install
+      rake_runner "app:stop"
     end
 
     def task(task)
       bundle.install
-      rake task
-    end
-
-    def build(task)
-      bundle.install
-      bundle.clean
-      rake task
-    end
-
-    def rake(task)
-      bundle.rake task
+      rake_runner task
     end
 
     def report_changes(previous_version, current_version)
@@ -63,6 +71,13 @@ module Dply
     end
 
     private
+
+    def rake_runner(*tasks, optional: false)
+      runner_tasks = tasks.map(&:strip).join(",")
+      s =  "drake:runner runner_tasks=#{runner_tasks}"
+      s << " runner_optional=true" if optional
+      bundle.rake s
+    end
 
     def bundle
       @bundle ||= Bundle.new
