@@ -7,22 +7,28 @@ module Dply
   module Helper
 
     def cmd(command, display: true, error_msg: nil, return_output: false, env:{}, shell: false)
+      if command.is_a? Array
+        command_arr = command
+        command_str = command.join(" ")
+      else
+        command_arr = %W(#{command})
+        command_str = command
+      end
       stringify_values!(env)
       if display
-        logger.bullet command
+        logger.bullet command_str
       else
-        logger.debug command
+        logger.debug command_str
       end
-      command_arr = command.split
-      run_command = shell ? command : command_arr
 
+      run_command = shell ? command_str : command_arr
       output = if return_output
         IO.popen(env, run_command) { |f| f.read }
       else
         system(env, *run_command, 2 => 1)
       end
       return_value = $?.exitstatus
-      error_msg ||= "non zero exit for \"#{command}\""
+      error_msg ||= "non zero exit for \"#{command_str}\""
       error error_msg if return_value != 0
       return output
     end
