@@ -38,8 +38,17 @@ module Dply
       rake_runner "app:stop"
     end
 
+    def app_task(task)
+      bundle.install
+      rake_runner task, app_task: true
+    end
+
     def task(task)
       bundle.install
+      rake_runner task
+    end
+
+    def rake(task)
       rake_runner task
     end
 
@@ -72,10 +81,11 @@ module Dply
 
     private
 
-    def rake_runner(*tasks, optional: false)
+    def rake_runner(*tasks, optional: false, app_task: false)
       runner_tasks = tasks.map(&:strip).join(",")
       s =  "drake:runner runner_tasks=#{runner_tasks}"
       s << " runner_optional=true" if optional
+      s << " runner_app_task=true" if app_task
       bundle.rake s
     end
 
