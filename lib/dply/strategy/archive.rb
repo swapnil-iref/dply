@@ -40,7 +40,7 @@ module Dply
         previous_version = get_release
         release.make_current
         Dir.chdir current_dir do
-          tasks.deploy target
+          tasks.deploy :archive
         end
         release.record_deployment
         current_version = get_release
@@ -52,7 +52,7 @@ module Dply
         download_configs if config_download_url
         Dir.chdir current_dir do
           link_all
-          tasks.reload target
+          tasks.reload
         end
       end
 
@@ -97,15 +97,6 @@ module Dply
         Dir.chdir release.path do
           link_all
           tasks.install_pkgs(use_yum: options[:use_yum])
-        end
-      end
-
-      def git_step
-        return if options[:skip_git]
-        if options[:no_pull]
-          git.checkout branch
-        else
-          git.pull branch
         end
       end
 

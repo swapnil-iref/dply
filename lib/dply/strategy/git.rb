@@ -32,7 +32,7 @@ module Dply
           current_version = git.commit_id
           link_all
           install_pkgs
-          tasks.deploy target
+          tasks.deploy :git
           tasks.report_changes(previous_version, current_version)
         end
       end
@@ -41,7 +41,7 @@ module Dply
         download_configs if config_download_url
         Dir.chdir current_dir do
           link_all
-          tasks.reload target
+          tasks.reload
         end
       end
 
