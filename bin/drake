@@ -73,13 +73,17 @@ begin
 
   command = (ARGV.shift || "").to_sym
   case command
-  when :deploy, :reload, :task,
-       :build, :depcheck, :"install-pkgs", :reopen_logs,
+  when :deploy, :task, :app_task,
+       :build, :depcheck, :"install-pkgs",
        :status, :devbuild, :setup
     run_cli command, ARGV
+  when :reload, :stop, :start, :reopen_logs
+    require 'dply/cli/ctl'
+    ctl = Dply::Cli::Ctl.new
+    ctl.run command
   when /\A[a-zA-Z_\-0-9]+[:][a-zA-Z_\-0-9]+\z/
     require 'dply/tasks'
-    ::Dply::Tasks.new.rake command
+    ::Dply::Tasks.new.rake command.to_s
   when :''
     puts opts_parser
   else
