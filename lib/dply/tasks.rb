@@ -16,7 +16,7 @@ module Dply
     end
 
     def build(target)
-      task = target ? "app:build:#{target}" : "app:build:archive"
+      task = target ? "app:build:#{target}" : "app:build"
       bundle.install
       bundle.clean
       rake_runner task
