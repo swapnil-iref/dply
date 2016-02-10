@@ -11,7 +11,7 @@ module Dply
         command_arr = command
         command_str = command.join(" ")
       else
-        command_arr = %W(#{command})
+        command_arr = command.split
         command_str = command
       end
       stringify_values!(env)
