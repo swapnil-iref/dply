@@ -15,7 +15,7 @@ module Dply
       return @config if @config
       @config = {
         dir: @dir,
-        task: "build:default",
+        task: "app:build",
         branch: :master,
         repo: nil,
         git: true,

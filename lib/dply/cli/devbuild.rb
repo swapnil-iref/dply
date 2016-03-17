@@ -25,7 +25,7 @@ module Dply
 
         clear_bundle_config
         tasks.install_pkgs(build_mode: true, use_yum: @options[:use_yum])
-        tasks.build "build:default"
+        tasks.build "app:build"
       ensure
         clear_bundle_config
       end

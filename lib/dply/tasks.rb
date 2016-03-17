@@ -15,11 +15,11 @@ module Dply
       rake_runner "app:test:#{target}", optional: optional
     end
 
-    def build(target)
-      task = target ? "app:build:#{target}" : "app:build"
+    def build(task)
+      fallback_task = "build:default"
       bundle.install
       bundle.clean
-      rake_runner task
+      rake_runner task, fallback_task
     end
 
     def deploy(target)

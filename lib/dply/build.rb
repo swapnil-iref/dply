@@ -12,7 +12,7 @@ module Dply
     extend Forwardable
     include Helper
 
-    def_delegators :config, :target, :branch, :config_download_url,
+    def_delegators :config, :branch, :config_download_url,
                           :config_map, :dir_map, :config_skip_download
 
     attr_reader :config
