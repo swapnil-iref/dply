@@ -40,7 +40,7 @@ module Dply
         previous_version = get_release
         release.make_current
         Dir.chdir current_dir do
-          tasks.deploy :archive
+          tasks.deploy deploy_target
         end
         release.record_deployment
         current_version = get_release
@@ -65,6 +65,10 @@ module Dply
       end
 
       private
+
+      def deploy_target
+        @deploy_target ||= (target || :archive)
+      end
 
       def current_dir
         @current_dir ||= "#{config.dir}/current"

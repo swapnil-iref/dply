@@ -22,10 +22,11 @@ module Dply
       rake_runner task
     end
 
-    def deploy(strategy, target: nil)
-      task = target ? "app:deploy:#{target}" : "app:deploy:#{strategy}"
+    def deploy(target)
+      task = "app:deploy:#{target}"
+      fallback_task = "production:deploy"
       bundle.install
-      rake_runner task
+      rake_runner task, fallback_task
     end
 
     def reload
