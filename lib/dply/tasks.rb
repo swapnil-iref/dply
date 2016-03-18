@@ -23,15 +23,23 @@ module Dply
     end
 
     def deploy(target)
-      task = "app:deploy:#{target}"
       fallback_task = "production:deploy"
+      task = "app:deploy:#{target}"
       bundle.install
       rake_runner task, fallback_task
     end
 
     def reload
+      fallback_task = "production:reload"
+      task = "app:reload"
       bundle.install
-      rake_runner "app:reload"
+      rake_runner task, fallback_task
+    end
+
+    def reopen_logs
+      fallback_task = "production:reopen_logs"
+      task = "app:reopen_logs"
+      rake_runner task, fallback_task
     end
 
     def stop
