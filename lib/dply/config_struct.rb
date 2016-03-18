@@ -11,7 +11,7 @@ module Dply
 
     def initialize(dir = nil)
       @dir = dir || Dir.pwd
-      @target = :default
+      @target = nil
       @branch = :master
       @verify_checksum = true
       @shared_dirs = []
