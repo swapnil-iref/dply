@@ -19,13 +19,7 @@ module Dply
         return if not proceed?
         lock.acquire
         setup_default
-        namespace = @argv.shift
-        if namespace
-          setup_task(namespace)
-        else
-          setup_build_task
-          setup_task(:production)
-        end
+        setup_app_rake
       end
 
       def proceed?
@@ -37,9 +31,9 @@ module Dply
       def setup_default
         if not File.exist? "dply"
           FileUtils.mkdir_p "dply"
-          logger.info "created dply/ dir"
+          logger.info "created dply/"
         else
-          logger.info "skipping dply/ dir"
+          logger.info "skipping dply/"
         end
 
         rakefile = "dply/Rakefile"
@@ -59,21 +53,14 @@ module Dply
         end
       end
 
-      def setup_task(namespace, template: "deploy.erb")
-        tasks_file = "dply/#{namespace}.rake"
+      def setup_app_rake
+        tasks_file = "dply/app.rake"
         if File.exist? tasks_file
           logger.info "skipping #{tasks_file}"
           return
         end
-        b = binding
-        template_path = "#{templates_dir}/#{template}"
-        erb = ERB.new(File.read(template_path), nil, '-')
-        File.open(tasks_file, 'w') { |f| f.write erb.result(b) }
+        FileUtils.cp "#{templates_dir}/deploy.erb", tasks_file
         logger.info "created #{tasks_file}"
-      end
-
-      def setup_build_task
-        setup_task("build", template: "build.erb")
       end
 
       def templates_dir
@@ -95,7 +82,6 @@ module Dply
           end
         end
       end
-
 
     end
   end
