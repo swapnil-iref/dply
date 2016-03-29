@@ -3,7 +3,7 @@ module Dply
   class ConfigStruct
 
     attr_writer :revision, :build_url, :build_url_proc, 
-                :revision_proc
+                :revision_proc, :latest_revision
     attr_accessor :dir, :name, :repo, :branch, :mirror,
                   :strategy, :target, :verify_checksum, 
                   :config_map, :dir_map, :shared_dirs, 
@@ -18,8 +18,8 @@ module Dply
     end
 
     def revision
-      if @revision == :latest
-        @revision = instance_eval(&revision_proc)
+      if @revision == "latest"
+        @revision = instance_eval(&latest_revision)
       else
         @revision
       end
@@ -40,6 +40,12 @@ module Dply
         "tmp" => "tmp",
         "log" => "log"
       }
+    end
+
+    def latest_revision
+      @latest_revision ||= Proc.new do
+        Jenkins.new(@repo, @name).latest_successful_revision
+      end
     end
 
   end
